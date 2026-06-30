@@ -11,17 +11,15 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import sys
 import time
 from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
 
 from hydramem.core.logging import get_logger
 from hydramem.garden.gardener import NightGardener
 from hydramem.ingest.pipeline import IngestionPipeline
 from hydramem.search import SearchService
+
+PROJECT_ROOT = Path(__file__).parent.parent
 
 logger = get_logger("hydramem.dogfood")
 
