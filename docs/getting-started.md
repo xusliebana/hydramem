@@ -13,9 +13,10 @@ This guide walks you through installing HydraMem, ingesting your first documents
 ## Step 1 — Install HydraMem
 
 ```bash
-# Install the CLI into an isolated environment (uv recommended)
-uv tool install git+https://github.com/xusliebana/hydramem
-# …or: pipx install git+https://github.com/xusliebana/hydramem
+# Install the CLI from PyPI (recommended)
+uv tool install hydramem
+# …or: pip install hydramem
+# …or: pipx install hydramem
 
 # Scaffold a workspace (config.yml, kms/, data/ + an MCP snippet)
 hydramem init ~/my-memory

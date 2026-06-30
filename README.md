@@ -92,9 +92,10 @@ The fastest path — install the `hydramem` CLI into an isolated environment wit
 uv (or [pipx](https://pipx.pypa.io/)), then scaffold a workspace:
 
 ```bash
-# uv (recommended)
-uv tool install git+https://github.com/xusliebana/hydramem
-# …or: pipx install git+https://github.com/xusliebana/hydramem
+# install from PyPI (recommended)
+uv tool install hydramem
+# …or: pip install hydramem
+# …or: pipx install hydramem
 
 hydramem init ~/my-memory     # writes config.yml, kms/, data/ + an MCP snippet
 cd ~/my-memory

@@ -1,0 +1,264 @@
+/* ===========================================================================
+   HydraMem docs — custom theme & animations (MkDocs Material)
+   =========================================================================== */
+
+:root {
+  --hm-grad: linear-gradient(120deg, #7c4dff 0%, #b388ff 45%, #5e35b1 100%);
+  --hm-grad-soft: linear-gradient(120deg, #7c4dff22, #b388ff22);
+}
+
+/* Brand accent tweaks ------------------------------------------------------ */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #5e35b1;
+  --md-accent-fg-color: #7c4dff;
+}
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #7c4dff;
+  --md-accent-fg-color: #b388ff;
+  --md-typeset-a-color: #b388ff;
+}
+
+/* ===========================================================================
+   Hero
+   =========================================================================== */
+.hm-hero {
+  position: relative;
+  margin: -1.2rem -0.8rem 2.4rem;
+  padding: 3.4rem 1.6rem 2.8rem;
+  text-align: center;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(1200px 400px at 50% -10%, #b388ff55, transparent 60%),
+    linear-gradient(135deg, #2a1a5e 0%, #4527a0 40%, #6d4bd8 100%);
+  background-size: 200% 200%;
+  animation: hm-shift 16s ease infinite, hm-fadeup 0.8s ease both;
+  box-shadow: 0 24px 60px -28px #4527a0aa;
+}
+.hm-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, #ffffff14 0 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, #ffffff10 0 1px, transparent 1px);
+  background-size: 36px 36px, 48px 48px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+.hm-hero > * { position: relative; z-index: 1; }
+
+.hm-hero__badge {
+  display: inline-block;
+  padding: 0.35rem 0.9rem;
+  margin-bottom: 1.1rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  color: #efe7ff;
+  background: #ffffff1f;
+  border: 1px solid #ffffff33;
+  backdrop-filter: blur(6px);
+}
+
+.hm-hero__title {
+  margin: 0.2rem auto 0.6rem;
+  max-width: 16ch;
+  font-weight: 800;
+  line-height: 1.08;
+  font-size: clamp(2rem, 4.6vw, 3.3rem);
+  color: #fff;
+}
+.hm-hero__title strong {
+  background: linear-gradient(92deg, #d9bcff, #fff 60%, #b388ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hm-hero__subtitle {
+  max-width: 60ch;
+  margin: 0 auto 1.6rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #e9e2ff;
+}
+.hm-hero__subtitle strong { color: #fff; }
+
+.hm-hero__cta {
+  display: flex;
+  gap: 0.7rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.8rem;
+}
+.hm-hero .md-button {
+  border-radius: 0.7rem;
+  font-weight: 600;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.hm-hero .md-button:hover { transform: translateY(-2px); }
+.hm-hero .md-button--primary {
+  background: #fff;
+  color: #4527a0;
+  border-color: #fff;
+  box-shadow: 0 12px 30px -12px #000000aa;
+}
+.hm-hero .md-button:not(.md-button--primary) {
+  color: #fff;
+  border-color: #ffffff66;
+}
+.hm-hero .md-button:not(.md-button--primary):hover {
+  background: #ffffff1a;
+  border-color: #fff;
+}
+
+.hm-hero .highlight {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: left;
+  border-radius: 0.8rem;
+  box-shadow: 0 18px 50px -24px #000000cc;
+}
+
+/* ===========================================================================
+   Stats strip (animated counters)
+   =========================================================================== */
+.hm-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin: 0 auto 2.4rem;
+}
+.hm-stat {
+  text-align: center;
+  padding: 1.1rem 0.6rem;
+  border-radius: 1rem;
+  background: var(--hm-grad-soft);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hm-stat:hover { transform: translateY(-3px); box-shadow: 0 16px 40px -26px #7c4dff99; }
+.hm-stat__num {
+  display: block;
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  font-weight: 800;
+  line-height: 1;
+  background: var(--hm-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hm-stat__label {
+  display: block;
+  margin-top: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--md-default-fg-color--light);
+  line-height: 1.4;
+}
+.hm-stat__label em { opacity: 0.75; font-size: 0.72rem; }
+
+/* ===========================================================================
+   Terminal card
+   =========================================================================== */
+.hm-terminal {
+  max-width: 720px;
+  margin: 0 auto 3rem;
+  border-radius: 0.9rem;
+  overflow: hidden;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  box-shadow: 0 20px 60px -30px #7c4dff66;
+}
+.hm-terminal::before {
+  content: "● ● ●";
+  display: block;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  color: #ff6b6b;
+  background: var(--md-code-bg-color);
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+.hm-terminal .highlight { margin: 0; }
+.hm-terminal pre { margin: 0; }
+
+/* ===========================================================================
+   Section titles + feature cards
+   =========================================================================== */
+.hm-section {
+  text-align: center;
+  margin-top: 3rem;
+  font-weight: 800;
+}
+.md-typeset .grid.cards > :is(ul, ol) > li,
+.md-typeset .grid.cards > .card {
+  border-radius: 0.9rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.md-typeset .grid.cards > :is(ul, ol) > li:hover {
+  transform: translateY(-4px);
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 18px 44px -26px #7c4dffaa;
+}
+.md-typeset .grid.cards .lg.middle { color: var(--md-accent-fg-color); }
+
+/* ===========================================================================
+   Final CTA band
+   =========================================================================== */
+.hm-cta {
+  margin: 3.5rem -0.8rem 0;
+  padding: 2.6rem 1.2rem;
+  text-align: center;
+  border-radius: 1.25rem;
+  color: #fff;
+  background: linear-gradient(135deg, #4527a0, #7c4dff);
+  box-shadow: 0 24px 60px -30px #4527a0aa;
+}
+.hm-cta h3 { color: #fff; margin-top: 0; font-size: 1.5rem; }
+.hm-cta .md-button { margin: 0.3rem; border-radius: 0.7rem; }
+.hm-cta .md-button--primary { background: #fff; color: #4527a0; border-color: #fff; }
+.hm-cta .md-button:not(.md-button--primary) { color: #fff; border-color: #ffffff66; }
+
+/* ===========================================================================
+   Scroll-reveal animation
+   =========================================================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  will-change: opacity, transform;
+}
+.reveal.in { opacity: 1; transform: none; }
+
+/* ===========================================================================
+   Keyframes
+   =========================================================================== */
+@keyframes hm-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes hm-fadeup {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ===========================================================================
+   Responsive
+   =========================================================================== */
+@media screen and (max-width: 60em) {
+  .hm-stats { grid-template-columns: repeat(2, 1fr); }
+}
+@media screen and (max-width: 30em) {
+  .hm-stats { grid-template-columns: 1fr 1fr; }
+  .hm-hero { padding: 2.4rem 1rem 2rem; }
+}
+
+/* Respect reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .hm-hero { animation: none; }
+}

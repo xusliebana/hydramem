@@ -1,0 +1,2567 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Local, private long-term memory for AI coding agents — hybrid graph + vector search, two-stage verification, and an autonomous Night Gardener. 100% local.">
+      
+      
+      
+        <link rel="canonical" href="https://xusliebana.github.io/hydramem/architecture/">
+      
+      
+        <link rel="prev" href="../getting-started/">
+      
+      
+        <link rel="next" href="../architecture-ir-km/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/hydramem-logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Architecture - HydraMem</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="HydraMem" class="md-header__button md-logo" aria-label="HydraMem" data-md-component="logo">
+      
+  <img src="../assets/hydramem-logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            HydraMem
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/xusliebana/hydramem" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    xusliebana/hydramem
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Quick Start
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../mcp-tools-reference/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../integrations/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Integrations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../roadmap/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Project
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="HydraMem" class="md-nav__button md-logo" aria-label="HydraMem" data-md-component="logo">
+      
+  <img src="../assets/hydramem-logo.svg" alt="logo">
+
+    </a>
+    HydraMem
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/xusliebana/hydramem" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    xusliebana/hydramem
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#system-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-1-ai-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 1 – AI Clients
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-2-mcp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 2 – MCP Server
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-3a-retrieval-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 3a – Retrieval Pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 3a – Retrieval Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#priming_context-fast-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        priming_context (fast path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydra_search-full-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydra_search (full path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trace_path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        trace_path
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-3b-two-level-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 3b – Two-Level Verification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 3b – Two-Level Verification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sr-mkg-scalable-relation-mining-with-knowledge-graphs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SR-MKG (Scalable Relation Mining with Knowledge Graphs)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vog-verification-of-groundedness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VoG (Verification of Groundedness)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-3c-night-gardener" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 3c – Night Gardener
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 3c – Night Gardener">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lightgnn-pruning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LightGNN Pruning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-4-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 4 – Storage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 4 – Storage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ladybugdb-kuzu-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LadybugDB / Kuzu (graph)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lancedb-vectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LanceDB (vectors)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#telemetry-sqlite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Telemetry (SQLite)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module Map
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module Map">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sub-package-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sub-package detail
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sub-package detail">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hydramemcore-domain-primitives-srp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydramem/core/ — Domain primitives (SRP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydramemllm-llm-provider-abstraction-ocp-dip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydramem/llm/ — LLM provider abstraction (OCP + DIP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydramemstorage-repository-pattern-ocp-dip-isp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydramem/storage/ — Repository pattern (OCP + DIP + ISP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydramemingest-ingestion-pipeline-srp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydramem/ingest/ — Ingestion pipeline (SRP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydramemverification-two-level-verification-ocp-lsp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydramem/verification/ — Two-level verification (OCP + LSP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydramemgarden-night-gardener-srp-per-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydramem/garden/ — Night Gardener (SRP per phase)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-flow-end-to-end-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data flow: end-to-end query
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture-ir-km/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Retrieval (IR / KM)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../night-gardener/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Night Gardener
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp-tools-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../telemetry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Telemetry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multi-tenant/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-tenant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GLOSSARY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../integrations/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/claude-code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/claude-code-retention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Code retention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/gemini-cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gemini CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/antigravity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Antigravity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/openclaw/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenClaw
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/cursor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cursor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../opencode-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenCode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/copilot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub Copilot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/remote-server/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Remote / Team server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#system-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-1-ai-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 1 – AI Clients
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-2-mcp-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 2 – MCP Server
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-3a-retrieval-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 3a – Retrieval Pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 3a – Retrieval Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#priming_context-fast-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        priming_context (fast path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydra_search-full-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydra_search (full path)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trace_path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        trace_path
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-3b-two-level-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 3b – Two-Level Verification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 3b – Two-Level Verification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sr-mkg-scalable-relation-mining-with-knowledge-graphs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SR-MKG (Scalable Relation Mining with Knowledge Graphs)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vog-verification-of-groundedness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VoG (Verification of Groundedness)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-3c-night-gardener" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 3c – Night Gardener
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 3c – Night Gardener">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lightgnn-pruning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LightGNN Pruning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#layer-4-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layer 4 – Storage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Layer 4 – Storage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ladybugdb-kuzu-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LadybugDB / Kuzu (graph)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lancedb-vectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LanceDB (vectors)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#telemetry-sqlite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Telemetry (SQLite)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module Map
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module Map">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sub-package-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sub-package detail
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sub-package detail">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hydramemcore-domain-primitives-srp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydramem/core/ — Domain primitives (SRP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydramemllm-llm-provider-abstraction-ocp-dip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydramem/llm/ — LLM provider abstraction (OCP + DIP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydramemstorage-repository-pattern-ocp-dip-isp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydramem/storage/ — Repository pattern (OCP + DIP + ISP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydramemingest-ingestion-pipeline-srp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydramem/ingest/ — Ingestion pipeline (SRP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydramemverification-two-level-verification-ocp-lsp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydramem/verification/ — Two-level verification (OCP + LSP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydramemgarden-night-gardener-srp-per-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hydramem/garden/ — Night Gardener (SRP per phase)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-flow-end-to-end-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data flow: end-to-end query
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h1>
+<p>HydraMem is built around four layers that work together to provide accurate, low-hallucination context to AI agents.</p>
+<hr />
+<h2 id="system-diagram">System diagram<a class="headerlink" href="#system-diagram" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌──────────────────────────────────────────────────────────────────────┐
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│  Layer 1: AI Clients                                                 │
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│  OpenCode · Claude Desktop · Cursor · VS Code Copilot · Custom      │
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│  Invokes Agent Skills (.github/skills/hydramem-*)                   │
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>└─────────────────────────────┬────────────────────────────────────────┘
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                              │ HTTP / MCP (Model Context Protocol)
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>┌─────────────────────────────▼────────────────────────────────────────┐
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│  Layer 2: MCP Server  (hydramem/server.py)                              │
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│  FastMCP · 18 tools · multi-provider LLM · telemetry logging        │
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>└──────────────┬──────────────────────────┬────────────────────────────┘
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>               │                          │
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>┌──────────────▼──────────────┐  ┌────────▼───────────────────────────┐
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│  Layer 3a: Retrieval        │  │  Layer 3b: Autonomous Learning      │
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│  hydramem/search.py            │  │  hydramem/garden/gardener.py        │
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│  · priming_context (fast)   │  │  · Phase 1: Relation Inference     │
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│  · hydra_search (full)      │  │  · Phase 2: SR-MKG + VoG verify   │
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│  · expand_context           │  │  · Phase 3: Graph Pruning          │
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│  · trace_path               │  │  hydramem/gnn_prune.py (LightGNN)    │
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│                             │  │                                    │
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│  hydramem/verification/        │  │                                    │
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│  · SR-MKG scoring           │  │                                    │
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>│  · VoG LLM verification     │  │                                    │
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>└──────────────┬──────────────┘  └────────┬───────────────────────────┘
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>               │                          │
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>┌──────────────▼──────────────────────────▼───────────────────────────┐
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│  Layer 4: Storage  (hydramem/storage/)                                  │
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>│  ┌──────────────────────────────┐  ┌────────────────────────────┐   │
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│  │  LadybugDB / Kuzu            │  │  LanceDB                   │   │
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>│  │  Graph: entities, relations, │  │  Vector index: embeddings, │   │
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>│  │  chunks, sessions            │  │  ANN search (HNSW)         │   │
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>│  │  Cypher queries              │  │  In-memory fallback        │   │
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>│  └──────────────────────────────┘  └────────────────────────────┘   │
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>│  ┌──────────────────────────────────────────────────────────────┐    │
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>│  │  Telemetry: ~/.hydramem/metrics.db (SQLite)                  │    │
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>│  └──────────────────────────────────────────────────────────────┘    │
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>└──────────────────────────────────────────────────────────────────────┘
+</span></code></pre></div>
+<hr />
+<h2 id="layer-1-ai-clients">Layer 1 – AI Clients<a class="headerlink" href="#layer-1-ai-clients" title="Permanent link">&para;</a></h2>
+<p>HydraMem integrates with any MCP-compatible AI client. The five bundled <strong>Agent Skills</strong> (<code>.github/skills/</code>) provide structured workflows for the most common operations:</p>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Triggered when agent needs to…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hydramem-query</code></td>
+<td>Answer a factual question from the knowledge base</td>
+</tr>
+<tr>
+<td><code>hydramem-reason</code></td>
+<td>Multi-hop causal reasoning over the graph</td>
+</tr>
+<tr>
+<td><code>hydramem-ingest</code></td>
+<td>Add new documents to the knowledge base</td>
+</tr>
+<tr>
+<td><code>hydramem-link</code></td>
+<td>Curate relations manually</td>
+</tr>
+<tr>
+<td><code>hydramem-garden</code></td>
+<td>Run the Night Gardener maintenance cycle</td>
+</tr>
+</tbody>
+</table>
+<p>Skills are YAML-frontmatter Markdown files that describe tool sequences to the AI client. They work with any client that supports MCP + agent skills (OpenCode, Cursor, Claude Desktop with plugins).</p>
+<hr />
+<h2 id="layer-2-mcp-server">Layer 2 – MCP Server<a class="headerlink" href="#layer-2-mcp-server" title="Permanent link">&para;</a></h2>
+<p><code>hydramem/server.py</code> runs a <a href="https://github.com/jlowin/fastmcp">FastMCP</a> HTTP server exposing 18 tools.</p>
+<p>Key design decisions:
+- <strong>Every tool logs telemetry</strong> atomically before returning — no silent failures.
+- <strong>Project namespacing</strong> — all storage is keyed by <code>project</code> to support multiple independent knowledge bases on one instance.
+- <strong>Session IDs</strong> — each server boot gets a UUID; tools accept an optional <code>session_id</code> override for grouping agent interactions.
+- <strong>Multi-provider LLM</strong> — resolved at startup from <code>config.yml</code>; each tool inherits the global preset unless overridden.</p>
+<hr />
+<h2 id="layer-3a-retrieval-pipeline">Layer 3a – Retrieval Pipeline<a class="headerlink" href="#layer-3a-retrieval-pipeline" title="Permanent link">&para;</a></h2>
+<h3 id="priming_context-fast-path"><code>priming_context</code> (fast path)<a class="headerlink" href="#priming_context-fast-path" title="Permanent link">&para;</a></h3>
+<p>Used when the agent needs quick context before a conversational turn.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Query → embed (nomic-embed-text-v1.5)
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>      → LanceDB ANN top-k chunks
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>      → entity extraction from query (regex + heuristics)
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>      → graph neighbour expansion (1 hop)
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>      → deduplicate + rank
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>      → return context string + chunk list
+</span></code></pre></div>
+<p>Average latency: <strong>&lt; 100 ms</strong> on a modern laptop (no LLM call required).</p>
+<h3 id="hydra_search-full-path"><code>hydra_search</code> (full path)<a class="headerlink" href="#hydra_search-full-path" title="Permanent link">&para;</a></h3>
+<p>Used for deep research questions where accuracy matters more than speed.</p>
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Query → embed
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>      → LanceDB ANN top-k
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>      → entity expansion (BFS / PPR / hybrid)
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>      → candidate relation retrieval
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>      → SR-MKG scoring (topological, no LLM; optionally calibrated)
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>      → borderline relations → VoG (LLM step-by-step)
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>      → ranked, verified context
+</span></code></pre></div>
+<p>The graph-walk strategy is selectable per request via the <code>traversal</code>
+parameter (<code>bfs</code> | <code>ppr</code> | <code>hybrid</code>). <code>ppr</code> runs Personalized PageRank
+seeded at query entities (HippoRAG-style); <code>hybrid</code> fuses the vector,
+BFS and PPR rankings via Reciprocal Rank Fusion. See
+<a href="../configuration/#search-traversal">configuration.md#search-traversal</a>.</p>
+<h3 id="trace_path"><code>trace_path</code><a class="headerlink" href="#trace_path" title="Permanent link">&para;</a></h3>
+<p>Shortest-path query between two entity IDs using graph BFS/Dijkstra. Returns the chain of relations connecting them.</p>
+<hr />
+<h2 id="layer-3b-two-level-verification">Layer 3b – Two-Level Verification<a class="headerlink" href="#layer-3b-two-level-verification" title="Permanent link">&para;</a></h2>
+<h3 id="sr-mkg-scalable-relation-mining-with-knowledge-graphs">SR-MKG (Scalable Relation Mining with Knowledge Graphs)<a class="headerlink" href="#sr-mkg-scalable-relation-mining-with-knowledge-graphs" title="Permanent link">&para;</a></h3>
+<p>A fast, <strong>LLM-free</strong> topological scorer. Computes a confidence score for a relation based on:
+- Jaccard coefficient of common graph neighbours
+- Degree penalty for isolated/orphan nodes
+- Named-relation type boost</p>
+<p>Score ≥ 0.7 → <strong>auto-accept</strong><br />
+Score &lt; 0.3 → <strong>auto-reject</strong><br />
+0.3 – 0.7   → forwarded to <strong>VoG</strong></p>
+<p>The four component weights can be replaced per-project by a learned
+logistic calibration (<code>hydramem calibrate-srmkg</code>); when a weights file
+exists at <code>~/.hydramem/projects/&lt;p&gt;/srmkg_weights.json</code> the scorer loads
+it transparently. See
+<a href="../verification/#per-project-calibration">verification.md#per-project-calibration</a>.</p>
+<h3 id="vog-verification-of-groundedness">VoG (Verification of Groundedness)<a class="headerlink" href="#vog-verification-of-groundedness" title="Permanent link">&para;</a></h3>
+<p>An LLM step-by-step check. Given the proposed relation and the two source text fragments:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Proposed: &quot;HydraMem&quot; –[uses]→ &quot;LanceDB&quot;
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Fragment A: &quot;HydraMem stores embeddings in LanceDB…&quot;
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>Fragment B: &quot;LanceDB provides serverless vector search…&quot;
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>→ GROUNDED  CONFIDENCE: 0.94
+</span></code></pre></div>
+<p>VoG is only called for borderline relations (<code>vog_max_candidates</code> cap prevents runaway API costs).</p>
+<hr />
+<h2 id="layer-3c-night-gardener">Layer 3c – Night Gardener<a class="headerlink" href="#layer-3c-night-gardener" title="Permanent link">&para;</a></h2>
+<p>See <a href="../night-gardener/">night-gardener.md</a> for full details.</p>
+<p>Three phases:
+1. <strong>Inference</strong> — LLM analyses stored Q&amp;A sessions and proposes new graph edges.
+2. <strong>Verification</strong> — every candidate passes SR-MKG + VoG.
+3. <strong>Pruning</strong> — isolated nodes and spurious edges are removed (rule-based + optional LightGNN).</p>
+<h3 id="lightgnn-pruning">LightGNN Pruning<a class="headerlink" href="#lightgnn-pruning" title="Permanent link">&para;</a></h3>
+<p>A lightweight Graph Neural Network that learns to distinguish genuine knowledge edges from co-occurrence noise.</p>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PyTorch Geometric</td>
+<td><code>pip install torch torch_geometric</code></td>
+</tr>
+<tr>
+<td>DGL</td>
+<td><code>pip install torch dgl</code></td>
+</tr>
+<tr>
+<td>Heuristic (default)</td>
+<td>No PyTorch — uses betweenness centrality + degree thresholds</td>
+</tr>
+</tbody>
+</table>
+<p>The heuristic approximates GNN results acceptably for most corpora.</p>
+<p>When the PyG backend is available, node features default to <strong>Laplacian
+Positional Encodings</strong> (<code>hydramem/garden/spectral.py</code>) concatenated with
+normalised degree, instead of the previous random low-rank features. LPE
+gives the GNN a real spectral signal at near-zero compute cost. Toggle
+via <code>gnn.use_laplacian_pe</code> (default on) and <code>gnn.lpe_k</code> (default 32).</p>
+<hr />
+<h2 id="layer-4-storage">Layer 4 – Storage<a class="headerlink" href="#layer-4-storage" title="Permanent link">&para;</a></h2>
+<h3 id="ladybugdb-kuzu-graph">LadybugDB / Kuzu (graph)<a class="headerlink" href="#ladybugdb-kuzu-graph" title="Permanent link">&para;</a></h3>
+<p>The graph store (<code>hydramem/storage/factory.py</code>) wraps LadybugDB (a fork of Kuzu). Schema:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Entity { id, name, type, project }
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Relation { from_id, to_id, relation_type, confidence, source_doc_id, project }
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Chunk { id, text, source, project, embedding_id }
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>Session { id, session_id, project, created_at, updated_at, text, entries[] }
+</span></code></pre></div>
+<p>Fallback: if LadybugDB is unavailable, the store switches to a <strong>NetworkX in-memory graph</strong> with JSON persistence.</p>
+<h3 id="lancedb-vectors">LanceDB (vectors)<a class="headerlink" href="#lancedb-vectors" title="Permanent link">&para;</a></h3>
+<p>Stores chunk embeddings as a LanceDB table with HNSW indexing. Queries return the top-k nearest chunks by cosine similarity.</p>
+<p>The embedding model (<code>nomic-ai/nomic-embed-text-v1.5</code>, truncated to 512-d) runs 100 % locally on CPU via fastembed or <code>sentence-transformers</code>.</p>
+<h3 id="telemetry-sqlite">Telemetry (SQLite)<a class="headerlink" href="#telemetry-sqlite" title="Permanent link">&para;</a></h3>
+<p><code>~/.hydramem/metrics.db</code> stores a <code>events</code> table with per-tool-call metrics. See <a href="../telemetry/">telemetry.md</a>.</p>
+<hr />
+<h2 id="module-map">Module Map<a class="headerlink" href="#module-map" title="Permanent link">&para;</a></h2>
+<p>The codebase is organised around <strong>SOLID principles</strong> and a strict <strong>dependency hierarchy</strong> — arrows show allowed import direction (lower layers never import from higher ones).</p>
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>hydramem/core/          ← zero dependencies (types, config, logging, tokens)
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>hydramem/llm/           ← depends on core/
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>hydramem/storage/       ← depends on core/
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>hydramem/ingest/        ← depends on core/, llm/, storage/
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>hydramem/verification/  ← depends on core/, llm/
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>hydramem/garden/        ← depends on core/, llm/, storage/, verification/
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>hydramem/search.py      ← depends on core/, ingest/, storage/, verification/
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>hydramem/server.py      ← depends on all of the above
+</span></code></pre></div>
+<h3 id="sub-package-detail">Sub-package detail<a class="headerlink" href="#sub-package-detail" title="Permanent link">&para;</a></h3>
+<h4 id="hydramemcore-domain-primitives-srp"><code>hydramem/core/</code> — Domain primitives (SRP)<a class="headerlink" href="#hydramemcore-domain-primitives-srp" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>types.py</code></td>
+<td>Pure dataclasses: <code>Chunk</code>, <code>Entity</code>, <code>Relation</code></td>
+</tr>
+<tr>
+<td><code>config.py</code></td>
+<td><code>Config</code> class + YAML/env resolution</td>
+</tr>
+<tr>
+<td><code>logging.py</code></td>
+<td><code>get_logger()</code> factory</td>
+</tr>
+<tr>
+<td><code>tokens.py</code></td>
+<td><code>count_tokens()</code> via tiktoken</td>
+</tr>
+</tbody>
+</table>
+<h4 id="hydramemllm-llm-provider-abstraction-ocp-dip"><code>hydramem/llm/</code> — LLM provider abstraction (OCP + DIP)<a class="headerlink" href="#hydramemllm-llm-provider-abstraction-ocp-dip" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>base.py</code></td>
+<td><code>LLMProvider</code> Protocol — the DIP boundary</td>
+</tr>
+<tr>
+<td><code>ollama.py</code></td>
+<td><code>OllamaProvider</code> — local inference</td>
+</tr>
+<tr>
+<td><code>openai.py</code></td>
+<td><code>OpenAIProvider</code> — OpenAI API</td>
+</tr>
+<tr>
+<td><code>anthropic.py</code></td>
+<td><code>AnthropicProvider</code> — Anthropic Claude API</td>
+</tr>
+<tr>
+<td><code>factory.py</code></td>
+<td><code>create_provider()</code>, <code>call_llm()</code> — registry + singleton</td>
+</tr>
+</tbody>
+</table>
+<p>Adding a new LLM backend: create one file + add one entry to the registry. <strong>Zero other files change.</strong></p>
+<h4 id="hydramemstorage-repository-pattern-ocp-dip-isp"><code>hydramem/storage/</code> — Repository pattern (OCP + DIP + ISP)<a class="headerlink" href="#hydramemstorage-repository-pattern-ocp-dip-isp" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>base.py</code></td>
+<td><code>GraphRepository</code> + <code>VectorRepository</code> Protocols</td>
+</tr>
+<tr>
+<td><code>graph/networkx_repo.py</code></td>
+<td>NetworkX in-memory graph (always available)</td>
+</tr>
+<tr>
+<td><code>graph/ladybug_repo.py</code></td>
+<td>LadybugDB / Kuzu persistent graph</td>
+</tr>
+<tr>
+<td><code>vector/lancedb_repo.py</code></td>
+<td>LanceDB persistent vector index</td>
+</tr>
+<tr>
+<td><code>vector/memory_repo.py</code></td>
+<td>In-memory cosine-similarity fallback</td>
+</tr>
+<tr>
+<td><code>factory.py</code></td>
+<td><code>KnowledgeStore</code> facade + <code>create_store()</code> / <code>get_store()</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>KnowledgeStore</code> composes one <code>GraphRepository</code> and one <code>VectorRepository</code>. Callers depend only on <code>KnowledgeStore</code> — never on concrete backends (DIP + ISP).</p>
+<h4 id="hydramemingest-ingestion-pipeline-srp"><code>hydramem/ingest/</code> — Ingestion pipeline (SRP)<a class="headerlink" href="#hydramemingest-ingestion-pipeline-srp" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chunker.py</code></td>
+<td><code>MarkdownChunker</code> — split text into token-sized pieces</td>
+</tr>
+<tr>
+<td><code>embedder.py</code></td>
+<td><code>EmbeddingService</code> — generate dense vectors</td>
+</tr>
+<tr>
+<td><code>extractor.py</code></td>
+<td><code>EntityExtractor</code> — heuristic named-entity recognition</td>
+</tr>
+<tr>
+<td><code>pipeline.py</code></td>
+<td><code>IngestionPipeline</code> — orchestrate the above (only coordination, no logic)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="hydramemverification-two-level-verification-ocp-lsp"><code>hydramem/verification/</code> — Two-level verification (OCP + LSP)<a class="headerlink" href="#hydramemverification-two-level-verification-ocp-lsp" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>base.py</code></td>
+<td><code>VerificationStep</code> Protocol + <code>VerificationResult</code> dataclass</td>
+</tr>
+<tr>
+<td><code>srmkg.py</code></td>
+<td><code>SRMKGScorer</code> — topological confidence, no LLM</td>
+</tr>
+<tr>
+<td><code>vog.py</code></td>
+<td><code>VoGVerifier</code> — LLM groundedness check, injected <code>LLMProvider</code></td>
+</tr>
+<tr>
+<td><code>pipeline.py</code></td>
+<td><code>VerificationPipeline</code> — SR-MKG → VoG with VoG cap</td>
+</tr>
+</tbody>
+</table>
+<p>New verification stages (e.g. neural) implement <code>VerificationStep</code> and slot in without touching callers (OCP).</p>
+<h4 id="hydramemgarden-night-gardener-srp-per-phase"><code>hydramem/garden/</code> — Night Gardener (SRP per phase)<a class="headerlink" href="#hydramemgarden-night-gardener-srp-per-phase" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>repository.py</code></td>
+<td><code>SessionRepository</code>, <code>StatusRepository</code> — JSON persistence only</td>
+</tr>
+<tr>
+<td><code>inferrer.py</code></td>
+<td><code>RelationInferrer</code> — Phase 1: propose candidates via LLM</td>
+</tr>
+<tr>
+<td><code>pruner.py</code></td>
+<td><code>KnowledgePruner</code> — Phase 3: remove stale/isolated elements</td>
+</tr>
+<tr>
+<td><code>gardener.py</code></td>
+<td><code>NightGardener</code> — orchestrate phases 1→2→3, inject all deps</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="data-flow-end-to-end-query">Data flow: end-to-end query<a class="headerlink" href="#data-flow-end-to-end-query" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>User: &quot;How does the Night Gardener prune stale edges?&quot;
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  │
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  ▼
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>[AI client] invokes hydramem-reason skill
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  │
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>  ▼
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>[MCP] → hydra_search_tool(query=..., project=&quot;default&quot;)
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>  │
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>  ▼
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>[search.py]
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>  ├── embed query → [0.12, -0.34, …]  (384 dims, CPU)
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>  ├── LanceDB ANN → top-5 chunks
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>  ├── extract entities: [&quot;Night Gardener&quot;, &quot;LightGNN&quot;]
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>  ├── graph expand → 2-hop neighbours → +3 chunks
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>  ├── SR-MKG score each relation
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>  └── VoG on 2 borderline relations → GROUNDED (0.89), GROUNDED (0.76)
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>  │
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>  ▼
+</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>[telemetry] log: tokens_injected=2140, tokens_baseline=18400, saved=88%
+</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>  │
+</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>  ▼
+</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>[AI client] receives verified context → generates grounded answer
+</span></code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../getting-started/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Quick Start">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Quick Start
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../architecture-ir-km/" class="md-footer__link md-footer__link--next" aria-label="Next: Retrieval (IR / KM)">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Retrieval (IR / KM)
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; HydraMem — MIT License
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/xusliebana/hydramem" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/hydramem/" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.tracking", "navigation.indexes", "navigation.footer", "content.code.copy", "content.code.annotate", "content.tabs.link", "search.suggest", "search.highlight", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/extra.js"></script>
+      
+    
+  </body>
+</html>

@@ -20,7 +20,7 @@ on your machine. Zero cloud by default.
 { .hm-hero__cta }
 
 ```bash
-uv tool install git+https://github.com/xusliebana/hydramem
+uv tool install hydramem
 hydramem init ~/my-memory && cd ~/my-memory
 hydramem ingest ./kms && hydramem search "what did we decide about auth?"
 ```
@@ -108,15 +108,16 @@ $ hydramem stats --last-7d
 === "uv (recommended)"
 
     ```bash
-    uv tool install git+https://github.com/xusliebana/hydramem
+    uv tool install hydramem
     hydramem init ~/my-memory
     cd ~/my-memory
     ```
 
-=== "pipx"
+=== "pip / pipx"
 
     ```bash
-    pipx install git+https://github.com/xusliebana/hydramem
+    pip install hydramem
+    # …or: pipx install hydramem
     hydramem init ~/my-memory
     cd ~/my-memory
     ```

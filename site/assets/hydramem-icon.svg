@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="hm-title hm-desc">
+  <title id="hm-title">HydraMem</title>
+  <desc id="hm-desc">HydraMem app icon: a multi-headed hydra knowledge graph in white on a teal-to-violet rounded square.</desc>
+  <defs>
+    <linearGradient id="hmBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0D9488"/>
+      <stop offset="0.55" stop-color="#0891B2"/>
+      <stop offset="1" stop-color="#6D28D9"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="256" height="256" rx="58" fill="url(#hmBg)"/>
+
+  <!-- white hydra-graph mark, padded inside the icon -->
+  <g transform="translate(128 124) scale(0.82) translate(-128 -132)">
+    <g fill="none" stroke="#FFFFFF" stroke-linecap="round" opacity="0.4" stroke-width="4">
+      <path d="M70 82 C 94 62 112 62 124 72"/>
+      <path d="M186 82 C 162 62 144 62 132 72"/>
+    </g>
+    <g fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round">
+      <path d="M128 166 C 120 140 136 114 128 78"/>
+      <path d="M116 172 C 92 152 70 116 58 86"/>
+      <path d="M140 172 C 164 152 186 116 198 86"/>
+    </g>
+    <circle cx="128" cy="184" r="25" fill="#FFFFFF"/>
+    <circle cx="128" cy="184" r="10" fill="#0891B2"/>
+    <g fill="#FFFFFF">
+      <circle cx="128" cy="74" r="19"/>
+      <circle cx="58" cy="86" r="17"/>
+      <circle cx="198" cy="86" r="17"/>
+    </g>
+    <g fill="#0B1020" opacity="0.45">
+      <circle cx="128" cy="72" r="4.6"/>
+      <circle cx="56" cy="84" r="4.2"/>
+      <circle cx="200" cy="84" r="4.2"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="hm-title hm-desc">
+  <title id="hm-title">HydraMem</title>
+  <desc id="hm-desc">A multi-headed hydra rendered as a knowledge graph: one memory core linked to three nodes.</desc>
+  <defs>
+    <linearGradient id="hmGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2DD4BF"/>
+      <stop offset="0.5" stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="hmHead" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5EEAD4"/>
+      <stop offset="1" stop-color="#818CF8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- faint cross links between heads (knowledge-graph edges) -->
+  <g fill="none" stroke="url(#hmGrad)" stroke-width="4" stroke-linecap="round" opacity="0.3">
+    <path d="M70 82 C 94 62 112 62 124 72"/>
+    <path d="M186 82 C 162 62 144 62 132 72"/>
+  </g>
+
+  <!-- necks: three serpent necks doubling as graph edges from the core -->
+  <g fill="none" stroke="url(#hmGrad)" stroke-width="14" stroke-linecap="round">
+    <path d="M128 166 C 120 140 136 114 128 78"/>
+    <path d="M116 172 C 92 152 70 116 58 86"/>
+    <path d="M140 172 C 164 152 186 116 198 86"/>
+  </g>
+
+  <!-- core: the memory node -->
+  <circle cx="128" cy="184" r="25" fill="url(#hmGrad)"/>
+  <circle cx="128" cy="184" r="10" fill="#0B1020" opacity="0.22"/>
+
+  <!-- heads: three graph nodes -->
+  <g fill="url(#hmHead)" stroke="#0B1020" stroke-opacity="0.06" stroke-width="1">
+    <circle cx="128" cy="74" r="19"/>
+    <circle cx="58" cy="86" r="17"/>
+    <circle cx="198" cy="86" r="17"/>
+  </g>
+
+  <!-- eyes / data highlights (serpent eyes + node specular) -->
+  <g fill="#0B1020" opacity="0.6">
+    <circle cx="128" cy="72" r="4.4"/>
+    <circle cx="56" cy="84" r="4"/>
+    <circle cx="200" cy="84" r="4"/>
+  </g>
+  <g fill="#FFFFFF" opacity="0.92">
+    <circle cx="130" cy="69.5" r="1.7"/>
+    <circle cx="58" cy="81.5" r="1.5"/>
+    <circle cx="202" cy="81.5" r="1.5"/>
+  </g>
+</svg>
