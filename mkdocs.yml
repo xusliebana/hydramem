@@ -111,6 +111,7 @@ nav:
       - Cursor: integrations/cursor.md
       - OpenCode: opencode-setup.md
       - GitHub Copilot: integrations/copilot.md
+      - Copilot Skills: integrations/copilot-skills.md
       - Remote / Team server: integrations/remote-server.md
   - Project:
       - Roadmap: roadmap.md

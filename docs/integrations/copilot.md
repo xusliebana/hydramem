@@ -40,6 +40,21 @@ Create `.vscode/mcp.json` in your workspace:
 Open the Copilot Chat **Agent** mode, click the tools picker, and enable the
 **hydramem** tools.
 
+## Built-in HydraMem skills for Copilot
+
+This repository includes six Copilot skills for common memory workflows:
+
+- `hydramem-ingest`
+- `hydramem-ingest-smart`
+- `hydramem-query`
+- `hydramem-reason`
+- `hydramem-link`
+- `hydramem-garden`
+
+See the full guide for when to use each one and how they handle context
+injection/retrieval:
+[GitHub Copilot Agent Skills](copilot-skills.md).
+
 ## Use it
 
 Ask Copilot agent mode things like *"search our HydraMem memory for the auth
@@ -60,4 +75,4 @@ decision"* or *"remember that we switched to Postgres"*. It will call
 
 ## See also
 
-- [OpenCode](../opencode-setup.md) · [MCP tools reference](../mcp-tools-reference.md)
+- [GitHub Copilot Agent Skills](copilot-skills.md) · [OpenCode](../opencode-setup.md) · [MCP tools reference](../mcp-tools-reference.md)

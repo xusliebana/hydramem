@@ -22,6 +22,7 @@ Closes #...
 ## Checklist
 
 - [ ] I read [CONTRIBUTING.md](../CONTRIBUTING.md).
+- [ ] If this PR used an AI agent, it followed [AGENTS.md](../AGENTS.md).
 - [ ] Tests added or updated (`uv run pytest` is green locally).
 - [ ] `uv run ruff check .` is clean.
 - [ ] Public APIs / configuration keys are documented in `docs/`.
