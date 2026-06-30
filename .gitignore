@@ -1,0 +1,82 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pkl
+*.egg-info/
+*.egg
+*.env
+.env
+.venv
+venv/
+build/
+dist/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test outputs
+htmlcov/
+.coverage
+.tox/
+
+# Database
+*.db
+*.sqlite3
+
+# LanceDB
+lancedb/
+
+# HydraMem data (no versionar)
+data/
+data/lancedb/
+
+# Misc
+*.bak
+*.swp
+*.tmp
+
+# Ignore secrets
+*.env.*
+secrets.yml
+config.yml
+
+# Docker volumes and persistent data
+hydramem_data/
+.hydramem/
+kms/
+!kms/*.md
+!kms/.gitkeep
+docs/assets/
+lancedb/
+
+# Agent runtime workspace (local). Only the templates below are versioned.
+.agent/*
+!.agent/README.md
+!.agent/current.example.md
+!.agent/log-template.md
+!.agent/tasks.example.json
+
+# opencode runtime workspace (local)
+.opencode/
+
+# Benchmark outputs
+.benchmarks/
+
+# Generated reports
+reports/
+
+# Node.js (global guard)
+node_modules/

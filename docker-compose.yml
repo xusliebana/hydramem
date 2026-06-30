@@ -1,0 +1,36 @@
+services:
+  # MCP server over stdio (default). JSON-RPC needs stdin, so keep -i / stdin_open.
+  #   docker compose run --rm hydramem
+  hydramem:
+    build: .
+    image: ghcr.io/hydramem/hydramem:latest
+    stdin_open: true
+    tty: false
+    volumes:
+      - hydramem-data:/data        # graph, vectors, metrics, sessions (single volume)
+      - ./kms:/work:ro             # mount your Markdown here, then: ... ingest /work
+    environment:
+      - HYDRAMEM_DATA_DIR=/data
+      - HYDRAMEM_TRANSPORT=stdio
+      # Add API keys here only if you use an external provider:
+      # - ANTHROPIC_API_KEY=sk-ant-...
+      # - HYDRAMEM_OPENAI_KEY=sk-...
+
+  # Optional HTTP transport on :3000.
+  #   docker compose --profile http up hydramem-http
+  hydramem-http:
+    build: .
+    image: ghcr.io/hydramem/hydramem:latest
+    profiles: ["http"]
+    command: ["serve", "--transport", "http", "--host", "0.0.0.0", "--port", "3000"]
+    ports:
+      - "3000:3000"
+    volumes:
+      - hydramem-data:/data
+    environment:
+      - HYDRAMEM_DATA_DIR=/data
+    restart: unless-stopped
+
+volumes:
+  hydramem-data:
+    driver: local

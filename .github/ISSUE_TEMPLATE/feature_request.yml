@@ -1,0 +1,40 @@
+name: Feature request
+description: Suggest an idea or improvement
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem this would solve
+      description: What is the use case? Why is the current behaviour insufficient?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - storage
+        - search
+        - verification
+        - night-gardener
+        - telemetry
+        - mcp-server
+        - cli
+        - docs
+    validations:
+      required: true

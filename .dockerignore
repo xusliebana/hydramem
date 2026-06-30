@@ -1,0 +1,33 @@
+# VCS / envs
+.git
+.gitignore
+.venv
+venv
+
+# Python caches
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Local data / secrets (never bake into the image)
+data/
+kms/
+.hydramem/
+.env
+.env.*
+
+# Repo material not needed to build the package
+tests/
+docs/
+examples/
+scripts/
+.github/
+*.log
+
+# Note: README.md is intentionally kept — pyproject reads it for the long description.

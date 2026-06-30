@@ -1,0 +1,116 @@
+site_name: HydraMem
+site_description: >-
+  Local, private long-term memory for AI coding agents — hybrid graph + vector
+  search, two-stage verification, and an autonomous Night Gardener. 100% local.
+site_url: https://hydramem.github.io/hydramem/
+repo_url: https://github.com/hydramem/hydramem
+repo_name: hydramem/hydramem
+copyright: Copyright &copy; HydraMem — MIT License
+docs_dir: docs
+
+# Keep the public site focused on user-facing docs. All internal / agent-facing
+# notes (CODEMAP, CONSTRAINTS, ADRs, contracts, playbooks, contributing, research,
+# benchmark results) live under docs/internal/ and are excluded from the build.
+exclude_docs: |
+  internal/
+
+theme:
+  name: material
+  logo: assets/hydramem-logo.svg
+  favicon: assets/hydramem-logo.svg
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - navigation.indexes
+    - navigation.footer
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - search.suggest
+    - search.highlight
+    - toc.follow
+
+extra_css:
+  - stylesheets/extra.css
+extra_javascript:
+  - javascripts/extra.js
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/hydramem/hydramem
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/hydramem/
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - def_list
+  - footnotes
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - Quick Start: getting-started.md
+  - Concepts:
+      - Architecture: architecture.md
+      - Retrieval (IR / KM): architecture-ir-km.md
+      - Verification: verification.md
+      - Night Gardener: night-gardener.md
+      - Benchmarks: benchmarks.md
+  - Reference:
+      - MCP Tools: mcp-tools-reference.md
+      - Configuration: configuration.md
+      - Telemetry: telemetry.md
+      - Multi-tenant: multi-tenant.md
+      - Glossary: GLOSSARY.md
+  - Integrations:
+      - Overview: integrations/index.md
+      - Claude Code: integrations/claude-code.md
+      - Claude Code retention: integrations/claude-code-retention.md
+      - Gemini CLI: integrations/gemini-cli.md
+      - Antigravity: integrations/antigravity.md
+      - OpenClaw: integrations/openclaw.md
+      - Cursor: integrations/cursor.md
+      - OpenCode: opencode-setup.md
+      - GitHub Copilot: integrations/copilot.md
+      - Remote / Team server: integrations/remote-server.md
+  - Project:
+      - Roadmap: roadmap.md

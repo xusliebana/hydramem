@@ -1,0 +1,206 @@
+# ─────────────────────────────────────────────────────────────
+# HydraMem – config.yml
+# ─────────────────────────────────────────────────────────────
+# Copy to: project root   OR   ~/.hydramem/config.yml
+# All values shown are the defaults.
+# API keys MUST be supplied via environment variables — never
+# hardcode secrets in this file.
+# ─────────────────────────────────────────────────────────────
+
+llm:
+  # Provider strategy:
+  #   auto       → tries Ollama first; falls back to external if API key is set
+  #   local      → Ollama only (never calls external APIs)
+  #   ollama     → explicit alias for "local"
+  #   openai     → OpenAI API only
+  #   anthropic  → Anthropic Claude API only
+  provider: auto  # "local" | "openai" | "anthropic" | "ollama"
+
+  # ── Local / Ollama ────────────────────────────────────────
+  local:
+    model: gemma4:e4b            # any model pulled via `ollama pull`
+    endpoint: http://localhost:11434
+    # Popular local models:
+    #   gemma4:e4b      E4B  – efficient on-device default (Gemma 4)
+    #   gemma3:4b       4B   – compact Gemma 3
+    #   llama3.2        3B   – fast, balanced quality
+    #   qwen2.5:7b      7B   – strong reasoning
+    #   mistral:7b      7B   – fast inference
+    #   phi3.5         3.8B  – very fast on CPU
+    #   deepseek-r1:8b  8B   – excellent for analysis
+
+  # ── External API ──────────────────────────────────────────
+  external:
+    provider: openai             # openai | anthropic | mistral (future)
+    api_key_env: HYDRAMEM_OPENAI_KEY   # env var name — NEVER hardcode keys
+    model: gpt-4o-mini           # cost-effective default
+    # OpenAI models:    gpt-4o, gpt-4o-mini, gpt-4-turbo, o1-mini
+    # Anthropic models: claude-opus-4-5, claude-sonnet-4-20250514, claude-haiku-20240307
+
+  # ── Anthropic example (uncomment to use) ─────────────────
+  # external:
+  #   provider: anthropic
+  #   api_key_env: ANTHROPIC_API_KEY
+  #   model: claude-sonnet-4-20250514
+
+# ─────────────────────────────────────────────────────────────
+# Embedding model (local, CPU-friendly)
+# ─────────────────────────────────────────────────────────────
+embedding:
+  model: nomic-ai/nomic-embed-text-v1.5   # downloaded automatically on first run
+  # Nomic-style models automatically receive task prefixes (search_query: for
+  # queries, search_document: for indexed chunks) — required for best retrieval.
+  # Matryoshka dimension. Nomic Embed v1.5 is native 768-d; HydraMem truncates +
+  # renormalises to `dim`. 512 = strong quality/size balance; 256 = smaller,
+  # faster indexes with minimal quality loss. Must be <= the model's native dim.
+  dim: 512
+  # Backend: auto | fastembed | sentence-transformers | stub
+  # When 'auto', HydraMem prefers fastembed (ONNX, ~80 MB) and falls back
+  # to sentence-transformers if fastembed is not installed. The 'stub'
+  # backend is deterministic but low-quality — only useful for offline tests.
+  # (sentence-transformers loads Nomic with trust_remote_code=True.)
+  backend: auto
+  # Other drop-in options (change `model:` and `dim:`):
+  #   BAAI/bge-small-en-v1.5     384  – MIT, tiny + fast
+  #   thenlper/gte-small         384  – Apache-2.0, multilingual
+  #   all-MiniLM-L6-v2           384  – previous default, smallest
+# ─────────────────────────────────────────────────
+# Entity extraction (named-entity recognition during ingest)
+# ──────────────────────────────────────────────────
+extraction:
+  # Backend: heuristic | gliner
+  #   heuristic → regex (default, zero extra deps, English-leaning)
+  #   gliner    → zero-shot multilingual NER. Install: pip install 'hydramem[gliner]'
+  #               Degrades gracefully to 'heuristic' if the model is unavailable.
+  backend: heuristic
+  gliner:
+    model: urchade/gliner_multi-v2.1
+    threshold: 0.5               # span confidence cutoff (0–1)
+    labels:                      # zero-shot entity types to detect
+      - person
+      - organization
+      - location
+      - concept
+      - product
+      - technology
+      - event
+      - date
+# ─────────────────────────────────────────────────────────────
+# Storage paths
+# ─────────────────────────────────────────────────────────────
+storage:
+  # Graph storage. Default: Grafeo (Python 3.12+), else NetworkX + pickle
+  # (pure Python, no native deps). If the path is a directory or has no suffix,
+  # a `graph.pkl` is placed inside.
+  #
+  # NOTE: the Kuzu / LadybugDB backend (HYDRAMEM_GRAPH_BACKEND=kuzu) is
+  # DEPRECATED — upstream Kuzu is unmaintained and it will be removed in a
+  # future release. Prefer Grafeo / NetworkX.
+  #
+  # Tip: set the HYDRAMEM_DATA_DIR env var (e.g. /data in Docker) to root the
+  # graph store, vector store, metrics DB and session log under one directory.
+  ladybug_db: ./data/hydramem.graph
+  lancedb: ./data/lancedb
+  knowledge_dir: ./kms           # directory scanned by ingest_directory_tool
+
+# ─────────────────────────────────────────────────────────────
+# MCP server
+# ─────────────────────────────────────────────────────────────
+server:
+  host: 0.0.0.0
+  port: 3000
+
+# ─────────────────────────────────────────────────────────────
+# Verification pipeline (SR-MKG + VoG)
+# ─────────────────────────────────────────────────────────────
+verification:
+  srmkg_threshold_accept: 0.7    # score ≥ 0.7 → auto-accept (no LLM call)
+  srmkg_threshold_reject: 0.3    # score < 0.3 → auto-reject (no LLM call)
+  vog_max_candidates: 30         # max borderline relations sent to VoG
+                                 # (reduce to save API costs)
+  vog_use_local_llm: true        # force VoG to use local LLM even if
+                                 # the global provider is external
+  # Log SR-MKG component breakdowns to ~/.hydramem/metrics.db so they can
+  # train a per-project logistic calibration via `hydramem calibrate-srmkg`.
+  srmkg_log_decisions: true
+
+# ─────────────────────────────────────────────────────────────
+# Search / retrieval
+# ─────────────────────────────────────────────────────────────
+search:
+  # Graph traversal mode for `hydra_search`:
+  #   bfs    – original behaviour, fast, no global structure (default)
+  #   ppr    – Personalized PageRank seeded at query entities (HippoRAG-style)
+  #   hybrid – BFS + PPR + vector rankings fused via Reciprocal Rank Fusion
+  traversal: bfs
+  ppr:
+    alpha: 0.5                    # restart probability
+    max_iter: 50
+    tol: 1.0e-4
+    top_k: 30                     # number of nodes kept before chunk fetch
+  bm25:
+    enabled: true                 # lexical keyword arm fused with vector+graph (RRF)
+    k1: 1.5                       # Okapi BM25 term-frequency saturation
+    b: 0.75                       # length normalisation
+    top_k: 0                      # 0 → reuse the query's top_k
+  # Typed retrieval planner: a zero-shot query classifier picks a strategy
+  # (factoid → cheap bfs + skip VoG; multi-hop → hybrid; comparative → ppr).
+  # Off by default; below `threshold` cosine confidence it uses the default.
+  planner:
+    enabled: false
+    threshold: 0.15
+
+# ─────────────────────────────────────────────────────────────
+# GNN pruner (Night Gardener edge scorer)
+# ─────────────────────────────────────────────────────────────
+gnn:
+  use_laplacian_pe: true          # spectral positional encodings as features
+  lpe_k: 32                       # number of Laplacian eigenvectors
+
+# ─────────────────────────────────────────────────────────────# Ingestion
+# ──────────────────────────────────────────────────────────────
+ingest:
+  # Collapse surface-form variants of the same entity ("HydraMem" / "hydramem"
+  # / "Hydra Mem") into one canonical node. Conservative: only merges names that
+  # are identical after case/space/punctuation normalisation (no fuzzy match).
+  entity_disambiguation: true
+
+# ──────────────────────────────────────────────────────────────# Night Gardener (autonomous learning)
+# ─────────────────────────────────────────────────────────────
+night_gardener:
+  enabled: true
+  schedule: "0 3 * * *"          # cron expression: 3 AM daily
+                                 # "0 */6 * * *"  → every 6 hours
+                                 # "0 0 * * 0"    → weekly, Sunday midnight
+  infer_with: local              # always infer locally → zero API cost
+  verify_with: auto              # local if available, else external API
+  min_repeat_count: 1            # prioritize entries seen >= N times before inference
+  # Retrieval-success consolidation: re-weight memory by what gets reused
+  # across sessions — boost reused entities, decay aged one-off isolates, and
+  # protect reused nodes from pruning. No LLM call in the critical path.
+  consolidation:
+    enabled: true
+    window_days: 30              # reuse look-back window
+    boost_per_session: 0.02      # tanh-saturated boost ceiling per run
+    decay_after_days: 14         # one-off isolates start decaying after N days
+    decay_per_step: 0.05         # max confidence decay per run
+    min_confidence: 0.05         # hard lower clamp
+    max_confidence: 0.99         # hard upper clamp
+  # Human-in-the-loop prune review (active-learning golden dataset for the GNN
+  # pruner). When enabled, the Gardener queues a sample of borderline
+  # spurious-edge candidates (uncertainty sampling) for you to label via
+  # `hydramem review`; `hydramem train-pruner` then learns a supervised edge
+  # scorer from the labels. Nothing is deleted by the capture step.
+  review:
+    enabled: false
+    sample_rate: 0.2             # fraction of borderline candidates to queue
+    uncertainty_band: 0.25       # |spuriousness - 0.65| <= band → "uncertain"
+    max_per_run: 50              # cap on candidates queued per cycle
+    auto_train: false            # step 2: retrain the scorer once enough labels exist
+  # Temporal invalidation (Zep/Graphiti-style fact supersession): when a new
+  # *functional* relation arrives, older conflicting edges get their validity
+  # window closed (valid_to) instead of lingering as stale contradictions.
+  # Off by default; only acts on the relation types you list as functional.
+  temporal_invalidation:
+    enabled: false
+    functional_types: []         # e.g. [located_in, works_at, capital_of]

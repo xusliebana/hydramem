@@ -1,0 +1,26 @@
+[
+  {
+    "id": "search-001",
+    "title": "Add date-range filter to hydra_search",
+    "area": "search",
+    "priority": 1,
+    "status": "in_progress",
+    "owner": "agent",
+    "public_api_impact": "additive",
+    "verification": "nox -s tests api; new case in tests/test_search.py",
+    "evidence": "",
+    "notes": "Parser implemented; integration test pending"
+  },
+  {
+    "id": "docs-002",
+    "title": "Example pending task",
+    "area": "docs",
+    "priority": 3,
+    "status": "pending",
+    "owner": "agent",
+    "public_api_impact": "none",
+    "verification": "nox -s lint",
+    "evidence": "",
+    "notes": "Allowed status values: pending | in_progress | blocked | done"
+  }
+]

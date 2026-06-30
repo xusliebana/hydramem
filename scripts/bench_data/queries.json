@@ -1,0 +1,12 @@
+[
+  {"id": "q1", "query": "How does the Night Gardener prune the knowledge graph?", "relevant": ["night_gardener"]},
+  {"id": "q2", "query": "Which vector database stores the chunk embeddings?", "relevant": ["lancedb"]},
+  {"id": "q3", "query": "What is the default graph backend on Python 3.12?", "relevant": ["grafeo"]},
+  {"id": "q4", "query": "How are relations scored from topology without an LLM?", "relevant": ["srmkg"]},
+  {"id": "q5", "query": "What checks whether passages actually support a relation?", "relevant": ["vog"]},
+  {"id": "q6", "query": "How does keyword BM25 retrieval complement dense embeddings?", "relevant": ["bm25"]},
+  {"id": "q7", "query": "What protocol exposes the tools to AI clients?", "relevant": ["mcp"]},
+  {"id": "q8", "query": "Where are token-savings metrics stored?", "relevant": ["telemetry"]},
+  {"id": "q9", "query": "What uses the Jaccard common-neighbour coefficient?", "relevant": ["srmkg"]},
+  {"id": "q10", "query": "How does Reciprocal Rank Fusion combine rankings?", "relevant": ["bm25"]}
+]
