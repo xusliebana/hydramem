@@ -131,7 +131,7 @@ The review loop is driven by two CLI verbs: `hydramem review` (label queued
 spurious-edge candidates → golden dataset) and `hydramem train-pruner` (learn a
 supervised edge scorer from the labels). See
 [night-gardener.md](night-gardener.md#phase-35-prune-review-human-in-the-loop-opt-in)
-and [internal/future_work/hitl-prune-review.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/hitl-prune-review.md).
+and [internal/future_work/hitl-prune-review.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/hitl-prune-review.md).
 
 ---
 

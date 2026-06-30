@@ -7,7 +7,7 @@ so Claude can search and grow a local, verified memory of your project.
 
 - HydraMem installed and on `$PATH` (`hydramem --version` to verify):
   ```bash
-  uv tool install git+https://github.com/hydramem/hydramem    # or: pipx install …
+  uv tool install git+https://github.com/xusliebana/hydramem    # or: pipx install …
   hydramem init ~/my-memory && cd ~/my-memory
   ```
 - Claude Code installed (`claude --version`).

@@ -43,7 +43,7 @@ This project follows the [Contributor Covenant](https://www.contributor-covenant
 ### Install with dev dependencies
 
 ```bash
-git clone https://github.com/hydramem/hydramem
+git clone https://github.com/xusliebana/hydramem
 cd hydramem
 uv sync --extra dev
 ```

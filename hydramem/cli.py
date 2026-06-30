@@ -37,7 +37,7 @@ _COST_PER_1M = 5.0  # USD per 1M tokens (conservative estimate)
 # shipped inside the installed package, so the template lives here).
 _DEFAULT_CONFIG_YML = """\
 # HydraMem configuration
-# Docs: https://github.com/hydramem/hydramem/blob/main/docs/configuration.md
+# Docs: https://github.com/xusliebana/hydramem/blob/main/docs/configuration.md
 # API keys MUST come from environment variables — never hardcode secrets here.
 
 llm:

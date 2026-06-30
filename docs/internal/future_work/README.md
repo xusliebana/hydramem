@@ -59,9 +59,9 @@ Principled but **unproven**: these add surface area without demonstrated ROI for
 a small, local-first project, so they sit off the shipping roadmap. The design
 docs stay so the thinking is preserved and demand stays visible. **Vote by
 adding a 👍 reaction on the item's tracking issue** — open one on
-[GitHub Issues](https://github.com/hydramem/hydramem/issues) if it doesn't
+[GitHub Issues](https://github.com/xusliebana/hydramem/issues) if it doesn't
 exist, or start a thread in
-[Discussions](https://github.com/hydramem/hydramem/discussions). An item
+[Discussions](https://github.com/xusliebana/hydramem/discussions). An item
 graduates back onto a milestone only when it gathers real demand **and** ships
 with a benchmark that proves the ROI.
 

@@ -78,5 +78,8 @@ lancedb/
 # Generated reports
 reports/
 
+# Media / marketing (not part of the library)
+media/
+
 # Node.js (global guard)
 node_modules/

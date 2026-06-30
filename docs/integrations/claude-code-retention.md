@@ -10,7 +10,7 @@ forward.
     **agent-submitted** knowledge. So "retention" here means: keep your notes
     ingested, and let the agent `remember` decisions. This is deliberate
     (agent-driven, verified storage) — see
-    [ADR-0005](https://github.com/hydramem/hydramem/blob/main/docs/internal/DECISIONS/0005-agent-driven-ingestion.md).
+    [ADR-0005](https://github.com/xusliebana/hydramem/blob/main/docs/internal/DECISIONS/0005-agent-driven-ingestion.md).
 
 ## 1. Backfill existing knowledge
 

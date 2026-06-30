@@ -68,7 +68,7 @@ experiment below remains the goal for headline numbers.
 A real, locally-run slice of **LongMemEval (`s`)** — faithful per-question
 haystack, `all-MiniLM-L6-v2`, no LLM judge. HydraMem's hybrid retrieval (vector
 + graph + BM25) beats naive dense top-k across Recall@{1,3,5} and MRR. Full
-table, caveats and reproduce command: **[internal/benchmark-results.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/benchmark-results.md)**;
+table, caveats and reproduce command: **[internal/benchmark-results.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/benchmark-results.md)**;
 raw artifact: [reports/longmemeval-local.json](../reports/longmemeval-local.json).
 Driver: [`scripts/longmemeval_local.py`](../scripts/longmemeval_local.py).
 

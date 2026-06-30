@@ -16,11 +16,11 @@ on your machine. Zero cloud by default.
 { .hm-hero__subtitle }
 
 [🚀&nbsp; Quick Start](getting-started/){ .md-button .md-button--primary }
-[★&nbsp; Star on GitHub](https://github.com/hydramem/hydramem){ .md-button }
+[★&nbsp; Star on GitHub](https://github.com/xusliebana/hydramem){ .md-button }
 { .hm-hero__cta }
 
 ```bash
-uv tool install git+https://github.com/hydramem/hydramem
+uv tool install git+https://github.com/xusliebana/hydramem
 hydramem init ~/my-memory && cd ~/my-memory
 hydramem ingest ./kms && hydramem search "what did we decide about auth?"
 ```
@@ -108,7 +108,7 @@ $ hydramem stats --last-7d
 === "uv (recommended)"
 
     ```bash
-    uv tool install git+https://github.com/hydramem/hydramem
+    uv tool install git+https://github.com/xusliebana/hydramem
     hydramem init ~/my-memory
     cd ~/my-memory
     ```
@@ -116,7 +116,7 @@ $ hydramem stats --last-7d
 === "pipx"
 
     ```bash
-    pipx install git+https://github.com/hydramem/hydramem
+    pipx install git+https://github.com/xusliebana/hydramem
     hydramem init ~/my-memory
     cd ~/my-memory
     ```
@@ -124,7 +124,7 @@ $ hydramem stats --last-7d
 === "From source"
 
     ```bash
-    git clone https://github.com/hydramem/hydramem && cd hydramem
+    git clone https://github.com/xusliebana/hydramem && cd hydramem
     cp config.yml.example config.yml
     uv sync
     uv run hydramem --help
@@ -198,6 +198,6 @@ locally. Swap any of them in `config.yml`.
 [🚀&nbsp; Get started](getting-started/){ .md-button .md-button--primary }
 [�&nbsp; Integrations](integrations/){ .md-button }
 [�📦&nbsp; MCP tools reference](mcp-tools-reference/){ .md-button }
-[★&nbsp; Star on GitHub](https://github.com/hydramem/hydramem){ .md-button }
+[★&nbsp; Star on GitHub](https://github.com/xusliebana/hydramem){ .md-button }
 
 </div>

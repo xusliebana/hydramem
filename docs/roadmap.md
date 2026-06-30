@@ -76,25 +76,25 @@ Theme: replace heuristic retrieval/scoring with principled geometry and
 modern local backends, without breaking the local-first contract.
 
 - [x] Modern embedder backends (bge-small, gte-small, jina-v3) via ONNX —
-      see [docs/internal/future_work/modern-embedders.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/modern-embedders.md).
+      see [docs/internal/future_work/modern-embedders.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/modern-embedders.md).
       Config-driven backend/model selection in `embedding:` (auto |
       fastembed | sentence-transformers | stub); change `model:` and
       `dim:` to swap to BGE/GTE without code changes.
 - [ ] GLiNER extractor backend (zero-shot, multilingual, CPU) —
-      see [docs/internal/future_work/gliner-extractor.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/gliner-extractor.md)
+      see [docs/internal/future_work/gliner-extractor.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/gliner-extractor.md)
 - [x] Laplacian Positional Encodings as default features for `gnn_prune` —
-      see [docs/internal/future_work/laplacian-pe.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/laplacian-pe.md).
+      see [docs/internal/future_work/laplacian-pe.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/laplacian-pe.md).
       Implemented in [`hydramem/garden/spectral.py`](../hydramem/garden/spectral.py),
       wired into [`hydramem/gnn_prune.py`](../hydramem/gnn_prune.py); toggle via
       `gnn.use_laplacian_pe` (default on).
 - [x] Personalized PageRank retrieval mode in `hydra_search`
       (`traversal: bfs | ppr | hybrid`) —
-      see [docs/internal/future_work/ppr-retrieval.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/ppr-retrieval.md).
+      see [docs/internal/future_work/ppr-retrieval.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/ppr-retrieval.md).
       Implemented in [`hydramem/ppr.py`](../hydramem/ppr.py) with RRF fusion; the
       `hydra_search_tool` MCP tool accepts a `traversal` argument.
 - [x] Learned SR-MKG weights via local logistic calibration
       (`hydramem calibrate-srmkg`) —
-      see [docs/internal/future_work/learned-srmkg-weights.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/learned-srmkg-weights.md).
+      see [docs/internal/future_work/learned-srmkg-weights.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/learned-srmkg-weights.md).
       Decisions are logged to the `srmkg_decisions` SQLite table; training
       lives in [`hydramem/verification/calibration.py`](../hydramem/verification/calibration.py)
       and writes weights to `~/.hydramem/projects/<p>/srmkg_weights.json`.
@@ -102,12 +102,12 @@ modern local backends, without breaking the local-first contract.
       `Relation.qualifiers` with canonical keys (`valid_from` / `valid_to` /
       `verifier` / `evidence_chunk_id` / …), collision-safe merge, and `as_of`
       temporal queries. See
-      [docs/internal/future_work/hyper-relational-schema.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/hyper-relational-schema.md)
+      [docs/internal/future_work/hyper-relational-schema.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/hyper-relational-schema.md)
 - [ ] Typed retrieval planner (query classifier → strategy) —
-      see [docs/internal/future_work/typed-retrieval-planner.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/typed-retrieval-planner.md)
+      see [docs/internal/future_work/typed-retrieval-planner.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/typed-retrieval-planner.md)
 - [~] Client LLM bridge/provider (delegate VoG / inference to an explicitly
       configured client-side LLM adapter) —
-      see [docs/internal/future_work/client-llm-bridge.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/client-llm-bridge.md).
+      see [docs/internal/future_work/client-llm-bridge.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/client-llm-bridge.md).
       **Ingestion path landed in 0.2.x**: agents call
       `ingest_prechunked` / `submit_session_extraction` to push
       chunks + entities + relations extracted with their own model;
@@ -127,7 +127,7 @@ Theme: the Night Gardener stops being a cron + LLM and starts behaving as
 a real episodic→semantic consolidator.
 
 - [ ] PPR-based consolidation phase in the Night Gardener —
-      see [docs/internal/future_work/retrieval-success-consolidation.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/retrieval-success-consolidation.md)
+      see [docs/internal/future_work/retrieval-success-consolidation.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/retrieval-success-consolidation.md)
 
 > The learned-graph-scorer items that used to sit here — R-GCN edge scorer,
 > spectral community summaries, local LoRA embedder, reasoning-motif miner,
@@ -152,21 +152,21 @@ local-first project. The design thinking is preserved so nothing is lost and so
 demand stays visible.
 
 **How to vote.** Add a 👍 reaction on the item's tracking issue
-([GitHub Issues](https://github.com/hydramem/hydramem/issues)) or open a thread
-in [Discussions](https://github.com/hydramem/hydramem/discussions). An item
+([GitHub Issues](https://github.com/xusliebana/hydramem/issues)) or open a thread
+in [Discussions](https://github.com/xusliebana/hydramem/discussions). An item
 graduates back onto a milestone only when it gathers real demand **and** ships
 with a benchmark that proves the ROI.
 
 ### Pruned from the roadmap (full design docs, votable)
 
 - **R-GCN edge scorer** replacing heuristic LightGNN —
-  [docs/internal/future_work/rgcn-edge-scorer.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/rgcn-edge-scorer.md)
+  [docs/internal/future_work/rgcn-edge-scorer.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/rgcn-edge-scorer.md)
 - **Spectral community summaries** (local GraphRAG-style community cache) —
-  [docs/internal/future_work/spectral-community-summaries.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/spectral-community-summaries.md)
+  [docs/internal/future_work/spectral-community-summaries.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/spectral-community-summaries.md)
 - **Local LoRA embedder** fine-tuned on verified relations —
-  [docs/internal/future_work/local-lora-embedder.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/local-lora-embedder.md)
+  [docs/internal/future_work/local-lora-embedder.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/local-lora-embedder.md)
 - **Privacy-safe reasoning-motif miner** —
-  [docs/internal/future_work/reasoning-motifs.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/reasoning-motifs.md)
+  [docs/internal/future_work/reasoning-motifs.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/reasoning-motifs.md)
 - **Active-VoG bandit** — which borderline relations deserve the LLM call
   _(no design doc yet)_
 - **Heat-kernel scoring** of implicit-relation candidates _(no design doc yet)_
@@ -190,7 +190,7 @@ with a benchmark that proves the ROI.
   the *grounded context returned by HydraMem*; the agent's internal
   chain-of-thought is never stored. Any future "reasoning trace" feature
   must abstract over public graph nodes only (see
-  [docs/internal/future_work/reasoning-motifs.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/reasoning-motifs.md)).
+  [docs/internal/future_work/reasoning-motifs.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/reasoning-motifs.md)).
 - **No federated gradient sharing across tenants.** Federated *knowledge*
   via signed export/import (already shipped) is the supported model.
   Cross-tenant FedAvg / LoRA aggregation is rejected on privacy grounds.

@@ -19,7 +19,7 @@ benchmarks, and clear documentation over hype.
 ## Development setup
 
 ```bash
-git clone https://github.com/hydramem/hydramem
+git clone https://github.com/xusliebana/hydramem
 cd hydramem
 uv sync --extra dev --extra fastembed
 uv run pre-commit install
@@ -101,7 +101,7 @@ Allowed scopes: `core`, `storage`, `search`, `verify`, `garden`, `ingest`,
 
 ## Reporting bugs and security issues
 
-- Functional bugs → [issue tracker](https://github.com/hydramem/hydramem/issues).
+- Functional bugs → [issue tracker](https://github.com/xusliebana/hydramem/issues).
 - Security vulnerabilities → see [SECURITY.md](SECURITY.md). **Do not** open a
   public issue.
 

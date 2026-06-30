@@ -93,8 +93,8 @@ uv (or [pipx](https://pipx.pypa.io/)), then scaffold a workspace:
 
 ```bash
 # uv (recommended)
-uv tool install git+https://github.com/hydramem/hydramem
-# …or: pipx install git+https://github.com/hydramem/hydramem
+uv tool install git+https://github.com/xusliebana/hydramem
+# …or: pipx install git+https://github.com/xusliebana/hydramem
 
 hydramem init ~/my-memory     # writes config.yml, kms/, data/ + an MCP snippet
 cd ~/my-memory
@@ -104,7 +104,7 @@ cd ~/my-memory
 <summary><strong>From source (for development)</strong></summary>
 
 ```bash
-git clone https://github.com/hydramem/hydramem
+git clone https://github.com/xusliebana/hydramem
 cd hydramem
 cp config.yml.example config.yml
 cp .env.example .env

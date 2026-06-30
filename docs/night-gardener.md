@@ -271,7 +271,7 @@ labels — no LLM, nothing leaves the machine.
 
 Counters `prune_reviews_queued` and `pruner_retrained` surface in
 `garden-status`. SOTA rationale + design:
-[docs/internal/future_work/hitl-prune-review.md](https://github.com/hydramem/hydramem/blob/main/docs/internal/future_work/hitl-prune-review.md).
+[docs/internal/future_work/hitl-prune-review.md](https://github.com/xusliebana/hydramem/blob/main/docs/internal/future_work/hitl-prune-review.md).
 
 ---
 

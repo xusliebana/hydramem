@@ -2,9 +2,9 @@ site_name: HydraMem
 site_description: >-
   Local, private long-term memory for AI coding agents — hybrid graph + vector
   search, two-stage verification, and an autonomous Night Gardener. 100% local.
-site_url: https://hydramem.github.io/hydramem/
-repo_url: https://github.com/hydramem/hydramem
-repo_name: hydramem/hydramem
+site_url: https://xusliebana.github.io/hydramem/
+repo_url: https://github.com/xusliebana/hydramem
+repo_name: xusliebana/hydramem
 copyright: Copyright &copy; HydraMem — MIT License
 docs_dir: docs
 
@@ -60,7 +60,7 @@ extra_javascript:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/hydramem/hydramem
+      link: https://github.com/xusliebana/hydramem
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/hydramem/
 

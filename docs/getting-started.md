@@ -14,15 +14,15 @@ This guide walks you through installing HydraMem, ingesting your first documents
 
 ```bash
 # Install the CLI into an isolated environment (uv recommended)
-uv tool install git+https://github.com/hydramem/hydramem
-# …or: pipx install git+https://github.com/hydramem/hydramem
+uv tool install git+https://github.com/xusliebana/hydramem
+# …or: pipx install git+https://github.com/xusliebana/hydramem
 
 # Scaffold a workspace (config.yml, kms/, data/ + an MCP snippet)
 hydramem init ~/my-memory
 cd ~/my-memory
 ```
 
-> **From source instead?** `git clone https://github.com/hydramem/hydramem && cd hydramem`,
+> **From source instead?** `git clone https://github.com/xusliebana/hydramem && cd hydramem`,
 > then `cp config.yml.example config.yml`, `cp .env.example .env`, `uv sync`, and
 > prefix the commands below with `uv run`.
 

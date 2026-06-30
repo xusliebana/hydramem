@@ -62,7 +62,7 @@ verification, the `remember` tool, ingestion, stats…). See the
 ## How "remembering" works in HydraMem (honest contract)
 
 HydraMem's memory model is **agent-driven** (see
-[ADR-0005](https://github.com/hydramem/hydramem/blob/main/docs/internal/DECISIONS/0005-agent-driven-ingestion.md)):
+[ADR-0005](https://github.com/xusliebana/hydramem/blob/main/docs/internal/DECISIONS/0005-agent-driven-ingestion.md)):
 the agent decides what is worth keeping and calls the **`remember`** tool to
 persist a verified fact mid-conversation, or ingests your Markdown notes with
 `hydramem ingest`.

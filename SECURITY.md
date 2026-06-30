@@ -13,7 +13,7 @@ If you discover a security issue, **please do not open a public GitHub issue**.
 Instead use one of these private channels:
 
 1. GitHub's "Report a vulnerability" form (preferred):
-   https://github.com/hydramem/hydramem/security/advisories/new
+   https://github.com/xusliebana/hydramem/security/advisories/new
 2. Email **security@hydramem.dev** with as much detail as you can share
    (reproduction steps, impact, suggested fix).
 

@@ -5,9 +5,33 @@ build-backend = "hatchling.build"
 [project]
 name = "hydramem"
 version = "0.2.0"
-description = "Local KMS with autonomous learning, hybrid graph-vector search, and MCP server"
+description = "100% local, privacy-first long-term memory for AI agents — hybrid graph + vector search, two-stage verification, and autonomous Night Gardener"
 readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "HydraMem Contributors" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Framework :: Robot Framework :: Library",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Database :: Database Engines/Servers",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+]
+keywords = ["knowledge management", "memory", "MCP", "LLM", "graph", "vector search", "RAG", "local-first", "privacy"]
 dependencies = [
     # MCP server (FastMCP 2.x API — supports streamable-http transport)
     "fastmcp>=2.14,<3.0",
@@ -68,10 +92,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/hydramem/hydramem"
-Repository = "https://github.com/hydramem/hydramem"
-Documentation = "https://github.com/hydramem/hydramem/tree/main/docs"
-Issues = "https://github.com/hydramem/hydramem/issues"
+Homepage = "https://github.com/xusliebana/hydramem"
+Repository = "https://github.com/xusliebana/hydramem"
+Documentation = "https://github.com/xusliebana/hydramem/tree/main/docs"
+Issues = "https://github.com/xusliebana/hydramem/issues"
 
 [project.scripts]
 hydramem-server = "hydramem.server:main"
