@@ -83,6 +83,8 @@ Full list: [docs/internal/CONSTRAINTS.md](docs/internal/CONSTRAINTS.md).
 
 ## Working rules (State subsystem)
 
+- **All agentic work must follow this harness.** If an AI agent is used, it must
+  follow `AGENTS.md` + the linked constraints, contracts, and verification gates.
 - **Trivial change:** no persistent plan needed, but still run the relevant `nox` session.
 - **Non-trivial change:** create/update `.agent/current.md` (goal, plan, files touched, commands run, next steps) and work **one task at a time**.
 - **User-visible change:** update [CHANGELOG.md](CHANGELOG.md) and, if the public surface changes, [docs/internal/CONTRACTS/PUBLIC_API.md](docs/internal/CONTRACTS/PUBLIC_API.md).

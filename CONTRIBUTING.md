@@ -89,6 +89,16 @@ Allowed scopes: `core`, `storage`, `search`, `verify`, `garden`, `ingest`,
 
 ## Pull requests
 
+HydraMem follows **GitHub Flow**:
+
+- Create a short-lived feature branch from `main`.
+- Open a PR back to `main`.
+- Keep the branch focused on a single concern.
+- Squash-merge after CI + review are green.
+
+If you are using an AI agent, the work must follow the project harness in
+[AGENTS.md](AGENTS.md) (constraints, verification, and state rules).
+
 1. Fork → feature branch (`feat/short-name` or `fix/short-name`).
 2. Before opening, work through [docs/internal/DEFINITION_OF_DONE.md](docs/internal/DEFINITION_OF_DONE.md).
    If you touched the public surface (entry points, MCP tools, documented API,
