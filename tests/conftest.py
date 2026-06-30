@@ -1,4 +1,5 @@
 """Shared pytest fixtures for HydraMem tests."""
+
 from __future__ import annotations
 
 import sys
@@ -22,6 +23,7 @@ def isolate_env(monkeypatch, tmp_path):
     import importlib
 
     import hydramem.core.config as cfg_mod
+
     importlib.reload(cfg_mod)
     yield
 
@@ -29,6 +31,7 @@ def isolate_env(monkeypatch, tmp_path):
 @pytest.fixture
 def tmp_metrics_db(tmp_path, monkeypatch):
     import hydramem.telemetry.storage as storage_mod
+
     db_path = tmp_path / "metrics.db"
     monkeypatch.setattr(storage_mod, "DB_PATH", db_path)
     monkeypatch.setattr(storage_mod, "DB_DIR", tmp_path)
@@ -39,6 +42,7 @@ def tmp_metrics_db(tmp_path, monkeypatch):
 def mock_store():
     """Return a MagicMock KnowledgeStore injected into the storage singleton."""
     import hydramem.storage.factory as fac
+
     mock = MagicMock()
     mock.vector_search.return_value = []
     mock.list_entities.return_value = []

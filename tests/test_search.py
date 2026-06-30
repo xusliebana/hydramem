@@ -1,4 +1,5 @@
 """Tests for SearchService."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -8,25 +9,33 @@ from hydramem.core.types import Chunk
 
 def _make_chunks(n, project="test"):
     return [
-        Chunk(id=f"c{i}", text=f"Chunk {i} about HydraMem.", source=f"doc{i}.md",
-              similarity=0.9 - i * 0.05, project=project)
+        Chunk(
+            id=f"c{i}",
+            text=f"Chunk {i} about HydraMem.",
+            source=f"doc{i}.md",
+            similarity=0.9 - i * 0.05,
+            project=project,
+        )
         for i in range(n)
     ]
 
 
 def _make_service(mock_store, embed_val=None):
     from hydramem.search import SearchService
+
     mock_embedder = MagicMock()
     mock_embedder.embed.return_value = embed_val or [0.1] * 384
     mock_pipeline = MagicMock()
     mock_pipeline.verify_chunks.return_value = {
-        "filtered": [], "verified": [], "rejected_vector": [],
-        "rejected_srmkg": [], "rejected_vog": [], "vog_scores": []
+        "filtered": [],
+        "verified": [],
+        "rejected_vector": [],
+        "rejected_srmkg": [],
+        "rejected_vog": [],
+        "vog_scores": [],
     }
     mock_pipeline.reset_vog_cap.return_value = None
-    return SearchService(
-        store=mock_store, embedder=mock_embedder, pipeline=mock_pipeline
-    )
+    return SearchService(store=mock_store, embedder=mock_embedder, pipeline=mock_pipeline)
 
 
 class TestPrimingContext:
@@ -40,6 +49,7 @@ class TestPrimingContext:
 
     def test_returns_empty_on_embed_failure(self, mock_store):
         from hydramem.search import SearchService
+
         mock_embedder = MagicMock()
         mock_embedder.embed.side_effect = RuntimeError("no model")
         svc = SearchService(store=mock_store, embedder=mock_embedder)
@@ -55,6 +65,7 @@ class TestHydraSearch:
         mock_store.get_chunks_near_entity.return_value = _make_chunks(2)
 
         from hydramem.search import SearchService
+
         mock_embedder = MagicMock()
         mock_embedder.embed.return_value = [0.1] * 384
         svc = SearchService(store=mock_store, embedder=mock_embedder)
@@ -78,16 +89,20 @@ class TestBM25Hybrid:
         from hydramem.search import SearchService
 
         corpus = [
-            Chunk(id="k1", text="The Night Gardener prunes spurious edges.",
-                  source="a.md", project="test"),
-            Chunk(id="k2", text="LanceDB stores vector embeddings.",
-                  source="b.md", project="test"),
-            Chunk(id="k3", text="Grafeo is the default graph backend.",
-                  source="c.md", project="test"),
+            Chunk(
+                id="k1",
+                text="The Night Gardener prunes spurious edges.",
+                source="a.md",
+                project="test",
+            ),
+            Chunk(id="k2", text="LanceDB stores vector embeddings.", source="b.md", project="test"),
+            Chunk(
+                id="k3", text="Grafeo is the default graph backend.", source="c.md", project="test"
+            ),
         ]
         store = MagicMock()
         store.get_all_chunks.return_value = corpus
-        store.vector_search.return_value = []          # dense arm misses it
+        store.vector_search.return_value = []  # dense arm misses it
         store.list_entities.return_value = []
         store.get_chunks_near_entity.return_value = []
         store.get_entity_neighbors.return_value = []
@@ -96,19 +111,23 @@ class TestBM25Hybrid:
         pipeline = MagicMock()
         pipeline.reset_vog_cap.return_value = None
         pipeline.verify_chunks.return_value = {
-            "filtered": [], "verified": [], "rejected_vector": [],
-            "rejected_srmkg": [], "rejected_vog": [], "vog_scores": [],
+            "filtered": [],
+            "verified": [],
+            "rejected_vector": [],
+            "rejected_srmkg": [],
+            "rejected_vog": [],
+            "vog_scores": [],
         }
         svc = SearchService(store=store, embedder=embedder, pipeline=pipeline)
 
         result = svc.hydra_search("Grafeo backend", project="test")
         ids = [c["id"] for c in result["chunks"]]
-        assert "k3" in ids                              # recalled by the BM25 arm
+        assert "k3" in ids  # recalled by the BM25 arm
         assert result["bm25"]["enabled"] is True
         assert result["bm25"]["candidates"] >= 1
 
     def test_bm25_no_op_on_empty_corpus(self, mock_store):
-        svc = _make_service(mock_store)                # get_all_chunks() == []
+        svc = _make_service(mock_store)  # get_all_chunks() == []
         result = svc.hydra_search("anything", project="test")
         assert result["bm25"]["candidates"] == 0
 
@@ -128,9 +147,7 @@ class TestHydraSearchTraversal:
             {"id": "e1", "name": "HydraMem"},
             {"id": "e2", "name": "LanceDB"},
         ]
-        mock_store.get_entity_neighbors.return_value = [
-            {"id": "e2", "confidence": 1.0}
-        ]
+        mock_store.get_entity_neighbors.return_value = [{"id": "e2", "confidence": 1.0}]
         mock_store.get_chunks_near_entity.return_value = _make_chunks(1)
 
         svc = _make_service(mock_store)
@@ -214,15 +231,17 @@ class TestPlannerIntegration:
         from hydramem.core.config import load_config
         from hydramem.search import SearchService
 
-        cfg = load_config(
-            {"search": {"planner": {"enabled": enabled, "threshold": threshold}}}
-        )
+        cfg = load_config({"search": {"planner": {"enabled": enabled, "threshold": threshold}}})
         embedder = MagicMock()
         embedder.embed.return_value = [0.1] * 8
         pipeline = MagicMock()
         pipeline.verify_chunks.return_value = {
-            "filtered": [], "verified": [], "rejected_vector": [],
-            "rejected_srmkg": [], "rejected_vog": [], "vog_scores": [],
+            "filtered": [],
+            "verified": [],
+            "rejected_vector": [],
+            "rejected_srmkg": [],
+            "rejected_vog": [],
+            "vog_scores": [],
         }
         pipeline.reset_vog_cap.return_value = None
         return SearchService(

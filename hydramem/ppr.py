@@ -7,6 +7,7 @@ until the caller invalidates it (e.g. after Night Gardener mutations).
 Roadmap slot: 0.4.x — Geometric memory.
 See ``docs/internal/future_work/ppr-retrieval.md``.
 """
+
 from __future__ import annotations
 
 import time
@@ -151,7 +152,7 @@ class PPRRetriever:
 
         row_sum = a.sum(axis=1, keepdims=True)
         # Replace dangling rows with uniform restart distribution.
-        dangling = (row_sum.flatten() == 0.0)
+        dangling = row_sum.flatten() == 0.0
         row_sum[row_sum == 0.0] = 1.0
         transition = a / row_sum
         if dangling.any():

@@ -1,4 +1,5 @@
 """EntityExtractor — single responsibility: extract named entities from text."""
+
 from __future__ import annotations
 
 import hashlib
@@ -16,8 +17,14 @@ logger = get_logger(__name__)
 # Default zero-shot label set for the GLiNER backend. Override via
 # ``extraction.gliner.labels`` in config.yml.
 _DEFAULT_GLINER_LABELS: tuple[str, ...] = (
-    "person", "organization", "location", "concept",
-    "product", "technology", "event", "date",
+    "person",
+    "organization",
+    "location",
+    "concept",
+    "product",
+    "technology",
+    "event",
+    "date",
 )
 
 
@@ -31,10 +38,29 @@ class EntityExtractorProtocol(Protocol):
 
     def extract(self, text: str, doc_id: str, project: str) -> list[Entity]: ...
 
+
 _STOP_WORDS: frozenset[str] = frozenset(
     {
-        "the", "a", "an", "in", "on", "at", "to", "for", "of", "and", "or",
-        "is", "are", "was", "were", "it", "this", "that", "with", "from",
+        "the",
+        "a",
+        "an",
+        "in",
+        "on",
+        "at",
+        "to",
+        "for",
+        "of",
+        "and",
+        "or",
+        "is",
+        "are",
+        "was",
+        "were",
+        "it",
+        "this",
+        "that",
+        "with",
+        "from",
     }
 )
 
@@ -58,9 +84,7 @@ class EntityExtractor:
 
     # ── Patterns ──────────────────────────────────────────────────────────────
 
-    def _capitalised_phrases(
-        self, text: str, doc_id: str, project: str
-    ) -> list[Entity]:
+    def _capitalised_phrases(self, text: str, doc_id: str, project: str) -> list[Entity]:
         entities = []
         for m in re.finditer(r"\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})\b", text):
             name = m.group(1)
@@ -173,9 +197,7 @@ class GlinerExtractor:
                 text, self._labels, threshold=self._threshold
             )
         except Exception as exc:  # noqa: BLE001
-            logger.warning(
-                "GLiNER inference failed (%s); using heuristic for this chunk", exc
-            )
+            logger.warning("GLiNER inference failed (%s); using heuristic for this chunk", exc)
             if self._fallback is None:
                 self._fallback = EntityExtractor()
             return self._fallback.extract(text, doc_id, project)
@@ -241,8 +263,5 @@ def create_extractor(
     chosen = (name or os.getenv("HYDRAMEM_EXTRACTOR") or "heuristic").lower()
     builder = _REGISTRY.get(chosen)
     if builder is None:
-        raise ValueError(
-            f"Unknown extractor {chosen!r}. Registered: {sorted(_REGISTRY)}"
-        )
+        raise ValueError(f"Unknown extractor {chosen!r}. Registered: {sorted(_REGISTRY)}")
     return builder(config)
-

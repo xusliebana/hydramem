@@ -11,6 +11,7 @@ Temporal ``as_of`` routing is a documented follow-up (see
 ``docs/internal/future_work/typed-retrieval-planner.md``); the temporal class still
 selects a sensible default strategy today.
 """
+
 from __future__ import annotations
 
 import math
@@ -23,10 +24,10 @@ class RetrievalStrategy:
     """A concrete retrieval plan chosen for a query."""
 
     name: str
-    traversal: str = "bfs"          # bfs | ppr | hybrid
+    traversal: str = "bfs"  # bfs | ppr | hybrid
     top_k: int = 10
-    skip_vog: bool = False          # cheap path for factoid lookups
-    bm25: bool = True               # lexical arm on/off
+    skip_vog: bool = False  # cheap path for factoid lookups
+    bm25: bool = True  # lexical arm on/off
     confidence: float = 0.0
 
 
@@ -34,16 +35,16 @@ class QueryPlanner(ABC):
     """Strategy selector contract (DIP — callers depend on this, not the impl)."""
 
     @abstractmethod
-    def plan(
-        self, query: str, *, default_top_k: int = 10
-    ) -> RetrievalStrategy | None:
+    def plan(self, query: str, *, default_top_k: int = 10) -> RetrievalStrategy | None:
         """Return a strategy, or ``None`` to fall through to the default."""
 
 
 # Natural-language prototypes each query is matched against (zero-shot).
 _CLASS_PROMPTS: dict[str, list[str]] = {
     "factoid": [
-        "what is", "who is", "define this term",
+        "what is",
+        "who is",
+        "define this term",
         "a short factual question with a single direct answer",
     ],
     "multi_hop": [
@@ -57,7 +58,8 @@ _CLASS_PROMPTS: dict[str, list[str]] = {
         "how something changed over time",
     ],
     "comparative": [
-        "compare two things", "the difference between X and Y",
+        "compare two things",
+        "the difference between X and Y",
         "which of two options is better and why",
     ],
 }
@@ -111,9 +113,7 @@ class ZeroShotPlanner(QueryPlanner):
             proto[cls] = _centroid([self._embedder.embed(p) for p in prompts])
         self._proto = proto
 
-    def plan(
-        self, query: str, *, default_top_k: int = 10
-    ) -> RetrievalStrategy | None:
+    def plan(self, query: str, *, default_top_k: int = 10) -> RetrievalStrategy | None:
         try:
             self._ensure_prototypes()
             qv = self._embedder.embed(query, is_query=True)

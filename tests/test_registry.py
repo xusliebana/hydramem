@@ -1,4 +1,5 @@
 """Tests for the entity disambiguation registry (collision avoidance)."""
+
 from __future__ import annotations
 
 from hydramem.ingest.registry import EntityRegistry, canonical_key, entity_id
@@ -27,10 +28,10 @@ def test_registry_resolves_to_single_canonical_entity():
 
     a = reg.resolve("HydraMem", "identifier")
     b = reg.resolve("Hydra Mem", "concept")
-    assert a.id == b.id                     # same canonical node
-    assert a.name == b.name == "HydraMem"   # deterministic best display
-    assert a.type == "identifier"           # most specific type wins
-    assert reg.merged_count == 1            # two surface forms collapsed into one
+    assert a.id == b.id  # same canonical node
+    assert a.name == b.name == "HydraMem"  # deterministic best display
+    assert a.type == "identifier"  # most specific type wins
+    assert reg.merged_count == 1  # two surface forms collapsed into one
     assert reg.id_for("hydra mem") == a.id  # any variant maps to the canonical id
 
 

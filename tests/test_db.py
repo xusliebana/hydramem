@@ -1,4 +1,5 @@
 """Tests for the storage layer (KnowledgeStore + repositories)."""
+
 from __future__ import annotations
 
 import pytest
@@ -12,6 +13,7 @@ class TestNetworkXGraphRepository:
     @pytest.fixture
     def repo(self):
         from hydramem.storage.graph.networkx_repo import NetworkXGraphRepository
+
         return NetworkXGraphRepository()
 
     def test_add_and_list_entity(self, repo):
@@ -22,8 +24,9 @@ class TestNetworkXGraphRepository:
     def test_add_and_delete_relation(self, repo):
         repo.add_entity(Entity(id="ea", name="A", project="test"))
         repo.add_entity(Entity(id="eb", name="B", project="test"))
-        repo.add_relation(Relation(from_entity="ea", to_entity="eb",
-                                   relation_type="causes", confidence=0.9))
+        repo.add_relation(
+            Relation(from_entity="ea", to_entity="eb", relation_type="causes", confidence=0.9)
+        )
         assert repo._graph.has_edge("ea", "eb")
 
         deleted = repo.delete_relation("ea", "eb", "causes")
@@ -33,8 +36,9 @@ class TestNetworkXGraphRepository:
     def test_get_entity_neighbors(self, repo):
         repo.add_entity(Entity(id="ea", name="A", project="test"))
         repo.add_entity(Entity(id="eb", name="B", project="test"))
-        repo.add_relation(Relation(from_entity="ea", to_entity="eb",
-                                   relation_type="uses", confidence=0.8))
+        repo.add_relation(
+            Relation(from_entity="ea", to_entity="eb", relation_type="uses", confidence=0.8)
+        )
         neighbours = repo.get_entity_neighbors("ea", hops=1)
         assert any(n["id"] == "eb" for n in neighbours)
 
@@ -51,6 +55,7 @@ class TestInMemoryVectorRepository:
     @pytest.fixture
     def repo(self):
         from hydramem.storage.vector.memory_repo import InMemoryVectorRepository
+
         return InMemoryVectorRepository()
 
     def test_add_and_search(self, repo):
@@ -88,6 +93,7 @@ class TestKnowledgeStore:
         from hydramem.storage.factory import KnowledgeStore
         from hydramem.storage.graph.networkx_repo import NetworkXGraphRepository
         from hydramem.storage.vector.memory_repo import InMemoryVectorRepository
+
         return KnowledgeStore(
             graph=NetworkXGraphRepository(),
             vector=InMemoryVectorRepository(),
@@ -108,8 +114,7 @@ class TestKnowledgeStore:
     def test_add_and_delete_relation(self, store):
         store.add_entity(Entity(id="ea", name="A", project="test"))
         store.add_entity(Entity(id="eb", name="B", project="test"))
-        rel = Relation(from_entity="ea", to_entity="eb",
-                       relation_type="uses", confidence=0.9)
+        rel = Relation(from_entity="ea", to_entity="eb", relation_type="uses", confidence=0.9)
         store.add_relation(rel)
         assert store.delete_relation("ea", "eb", "uses")
 
@@ -126,4 +131,3 @@ class TestLadybugDeprecation:
             warnings.simplefilter("always")
             LadybugGraphRepository(str(tmp_path / "g.kuzu"), fake_mod)
         assert any(issubclass(w.category, DeprecationWarning) for w in caught)
-

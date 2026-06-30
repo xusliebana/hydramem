@@ -1,4 +1,5 @@
 """Ollama LLM provider — local, free, privacy-preserving."""
+
 from __future__ import annotations
 
 from hydramem.core.logging import get_logger

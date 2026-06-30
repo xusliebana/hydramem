@@ -1,4 +1,5 @@
 """Tests for persistent MENTIONS edges + graph-only search + provenance."""
+
 from __future__ import annotations
 
 from hydramem.core.types import Chunk, Entity, Relation
@@ -7,7 +8,9 @@ from hydramem.storage.graph.networkx_repo import NetworkXGraphRepository
 
 def test_networkx_persistent_mentions():
     repo = NetworkXGraphRepository()
-    chunk = Chunk(id="c1", text="LanceDB is great", source="x.md", chunk_idx=0, doc_id="d1", project="demo")
+    chunk = Chunk(
+        id="c1", text="LanceDB is great", source="x.md", chunk_idx=0, doc_id="d1", project="demo"
+    )
     repo.add_chunk(chunk)
     repo.add_entity(Entity(id="e1", name="LanceDB", type="identifier", project="demo"))
     repo.add_mention("c1", "e1")
@@ -22,9 +25,14 @@ def test_networkx_relation_records_provenance():
     repo.add_entity(Entity(id="a", name="A", project="demo"))
     repo.add_entity(Entity(id="b", name="B", project="demo"))
     rel = Relation(
-        from_entity="a", to_entity="b", relation_type="uses",
-        confidence=0.9, verified=True, project="demo",
-        session_id="sess-42", origin_tool="verify_relation",
+        from_entity="a",
+        to_entity="b",
+        relation_type="uses",
+        confidence=0.9,
+        verified=True,
+        project="demo",
+        session_id="sess-42",
+        origin_tool="verify_relation",
         created_at="2026-05-08T10:00:00+00:00",
     )
     repo.add_relation(rel)
@@ -38,11 +46,16 @@ def test_networkx_relation_qualifiers_roundtrip():
     repo = NetworkXGraphRepository()
     repo.add_entity(Entity(id="a", name="A", project="demo"))
     repo.add_entity(Entity(id="b", name="B", project="demo"))
-    repo.add_relation(Relation(
-        from_entity="a", to_entity="b", relation_type="uses",
-        confidence=0.8, project="demo",
-        qualifiers={"valid_from": "2026-01-01", "verifier": "manual"},
-    ))
+    repo.add_relation(
+        Relation(
+            from_entity="a",
+            to_entity="b",
+            relation_type="uses",
+            confidence=0.8,
+            project="demo",
+            qualifiers={"valid_from": "2026-01-01", "verifier": "manual"},
+        )
+    )
     rels = repo.list_relations(project="demo")
     assert rels[0]["qualifiers"]["valid_from"] == "2026-01-01"
     assert rels[0]["qualifiers"]["verifier"] == "manual"
@@ -53,37 +66,50 @@ def test_networkx_relation_readd_merges_qualifiers_no_collision():
     repo.add_entity(Entity(id="a", name="A", project="demo"))
     repo.add_entity(Entity(id="b", name="B", project="demo"))
     # First observation: temporal start + manual verifier, low confidence.
-    repo.add_relation(Relation(
-        from_entity="a", to_entity="b", relation_type="uses",
-        confidence=0.4, verified=False, project="demo",
-        qualifiers={"valid_from": "2026-01-01", "verifier": "manual"},
-    ))
+    repo.add_relation(
+        Relation(
+            from_entity="a",
+            to_entity="b",
+            relation_type="uses",
+            confidence=0.4,
+            verified=False,
+            project="demo",
+            qualifiers={"valid_from": "2026-01-01", "verifier": "manual"},
+        )
+    )
     # Re-observe the SAME typed edge: add an end date, upgrade the verifier,
     # higher confidence, now verified. Must MERGE, not collide/overwrite.
-    repo.add_relation(Relation(
-        from_entity="a", to_entity="b", relation_type="uses",
-        confidence=0.9, verified=True, project="demo",
-        qualifiers={"valid_to": "2026-06-01", "verifier": "vog"},
-    ))
+    repo.add_relation(
+        Relation(
+            from_entity="a",
+            to_entity="b",
+            relation_type="uses",
+            confidence=0.9,
+            verified=True,
+            project="demo",
+            qualifiers={"valid_to": "2026-06-01", "verifier": "vog"},
+        )
+    )
     rels = repo.list_relations(project="demo")
-    assert len(rels) == 1                     # still one edge, no duplicate
+    assert len(rels) == 1  # still one edge, no duplicate
     q = rels[0]["qualifiers"]
-    assert q["valid_from"] == "2026-01-01"    # preserved from first observation
-    assert q["valid_to"] == "2026-06-01"      # added by the second
-    assert q["verifier"] == "vog"             # newer wins
-    assert rels[0]["confidence"] == 0.9       # strongest confidence kept
-    assert rels[0]["verified"] is True        # verified OR-accumulated
+    assert q["valid_from"] == "2026-01-01"  # preserved from first observation
+    assert q["valid_to"] == "2026-06-01"  # added by the second
+    assert q["verifier"] == "vog"  # newer wins
+    assert rels[0]["confidence"] == 0.9  # strongest confidence kept
+    assert rels[0]["verified"] is True  # verified OR-accumulated
 
 
 def test_relation_valid_at_temporal_window():
     from hydramem.core.types import relation_valid_at
+
     q = {"valid_from": "2026-01-01", "valid_to": "2026-06-01"}
-    assert relation_valid_at(q, "2026-03-01")              # inside window
-    assert not relation_valid_at(q, "2025-12-31")          # before start
-    assert not relation_valid_at(q, "2026-07-01")          # after end
-    assert relation_valid_at(q, "2026-06-01T12:00:00Z")    # date-only end = whole day
-    assert relation_valid_at({}, "2026-03-01")             # no window = always valid
-    assert relation_valid_at(q, "")                         # no as_of = match all
+    assert relation_valid_at(q, "2026-03-01")  # inside window
+    assert not relation_valid_at(q, "2025-12-31")  # before start
+    assert not relation_valid_at(q, "2026-07-01")  # after end
+    assert relation_valid_at(q, "2026-06-01T12:00:00Z")  # date-only end = whole day
+    assert relation_valid_at({}, "2026-03-01")  # no window = always valid
+    assert relation_valid_at(q, "")  # no as_of = match all
 
 
 def test_temporal_neighbors_and_entity_relations_as_of():
@@ -95,19 +121,27 @@ def test_temporal_neighbors_and_entity_relations_as_of():
     for eid, name in (("a", "A"), ("b", "B"), ("c", "C")):
         repo.add_entity(Entity(id=eid, name=name, project="demo"))
     # A worked on B only in H1 2026; A works on C from mid-2026 onward.
-    repo.add_relation(Relation(
-        from_entity="a", to_entity="b", relation_type="worked_on",
-        confidence=0.9, project="demo",
-        qualifiers={"valid_from": "2026-01-01", "valid_to": "2026-06-01"},
-    ))
-    repo.add_relation(Relation(
-        from_entity="a", to_entity="c", relation_type="worked_on",
-        confidence=0.9, project="demo",
-        qualifiers={"valid_from": "2026-07-01"},
-    ))
-    svc = SearchService(
-        store=KnowledgeStore(graph=repo, vector=InMemoryVectorRepository())
+    repo.add_relation(
+        Relation(
+            from_entity="a",
+            to_entity="b",
+            relation_type="worked_on",
+            confidence=0.9,
+            project="demo",
+            qualifiers={"valid_from": "2026-01-01", "valid_to": "2026-06-01"},
+        )
     )
+    repo.add_relation(
+        Relation(
+            from_entity="a",
+            to_entity="c",
+            relation_type="worked_on",
+            confidence=0.9,
+            project="demo",
+            qualifiers={"valid_from": "2026-07-01"},
+        )
+    )
+    svc = SearchService(store=KnowledgeStore(graph=repo, vector=InMemoryVectorRepository()))
 
     march = {e["id"] for e in svc.temporal_neighbors("a", project="demo", as_of="2026-03-01")}
     assert march == {"b"}

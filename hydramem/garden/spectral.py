@@ -7,6 +7,7 @@ stack the rest of HydraMem uses.
 Roadmap slot: 0.4.x — Geometric memory.
 See ``docs/internal/future_work/laplacian-pe.md`` for the design discussion.
 """
+
 from __future__ import annotations
 
 from hydramem.core.logging import get_logger

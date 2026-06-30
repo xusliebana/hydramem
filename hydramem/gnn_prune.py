@@ -21,6 +21,7 @@ RAM for larger ones. To stay safe by default we:
 For production-scale (> ~50 k nodes) we recommend running this offline with
 proper GraphSAINT / NeighborLoader sampling — see ``docs/benchmarks.md``.
 """
+
 from __future__ import annotations
 
 import os
@@ -36,7 +37,9 @@ _TRAIN_EPOCHS: int = 30
 # Laplacian Positional Encodings — non-trainable spectral features for the
 # GNN pruner. Default ON; can be disabled via env or config.
 USE_LAPLACIAN_PE: bool = os.getenv("HYDRAMEM_GNN_LAPLACIAN_PE", "1").lower() not in (
-    "0", "false", "no",
+    "0",
+    "false",
+    "no",
 )
 _LPE_K: int = int(os.getenv("HYDRAMEM_GNN_LPE_K", "32"))
 
@@ -88,6 +91,7 @@ def edge_feature_vector(features: dict) -> list[float]:
 # Result type
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class PruningResult:
     method: str
@@ -100,6 +104,7 @@ class PruningResult:
 # ---------------------------------------------------------------------------
 # GNNPruner
 # ---------------------------------------------------------------------------
+
 
 class GNNPruner:
     """Detect and optionally remove spurious edges from the knowledge graph.
@@ -119,6 +124,7 @@ class GNNPruner:
         # Honour config knobs without hard import (config may be heavy in tests).
         try:
             from hydramem.core.config import load_config
+
             cfg = load_config()
             self._use_lpe = bool(getattr(cfg, "gnn_use_laplacian_pe", USE_LAPLACIAN_PE))
             self._lpe_k = int(getattr(cfg, "gnn_lpe_k", _LPE_K))
@@ -131,12 +137,14 @@ class GNNPruner:
         try:
             import torch  # noqa: F401
             import torch_geometric  # noqa: F401
+
             return "pyg"
         except ImportError:
             pass
         try:
             import dgl  # noqa: F401
             import torch  # noqa: F401
+
             return "dgl"
         except ImportError:
             pass
@@ -162,7 +170,8 @@ class GNNPruner:
             if backend == "pyg" and graph.number_of_nodes() > MAX_GNN_NODES:
                 logger.info(
                     "GNNPruner: graph has %d nodes (> MAX_GNN_NODES=%d); using heuristic backend",
-                    graph.number_of_nodes(), MAX_GNN_NODES,
+                    graph.number_of_nodes(),
+                    MAX_GNN_NODES,
                 )
                 backend = "heuristic"
 
@@ -170,13 +179,12 @@ class GNNPruner:
                 scores = self._pyg_scores(graph)
             else:
                 scores = self._heuristic_scores(graph)
-        suggested = [
-            (u, v) for (u, v), s in scores.items()
-            if s >= self._SPURIOUS_THRESHOLD
-        ]
+        suggested = [(u, v) for (u, v), s in scores.items() if s >= self._SPURIOUS_THRESHOLD]
         logger.info(
             "GNNPruner (backend=%s): %d edges scored, %d suggested",
-            backend, len(scores), len(suggested),
+            backend,
+            len(scores),
+            len(suggested),
         )
         return PruningResult(
             method=backend,
@@ -233,7 +241,8 @@ class GNNPruner:
         if graph.number_of_nodes() > MAX_GNN_NODES:
             logger.info(
                 "feature_rows: graph has %d nodes (> MAX_GNN_NODES=%d); skipping capture",
-                graph.number_of_nodes(), MAX_GNN_NODES,
+                graph.number_of_nodes(),
+                MAX_GNN_NODES,
             )
             return []
         rows: list[dict] = []
@@ -264,15 +273,14 @@ class GNNPruner:
         b = float(weights.get("intercept", 0.0))
         scores: dict[tuple, float] = {}
         for edge, f in compute_edge_features(graph).items():
-            z = b + sum(
-                float(w.get(k, 0.0)) * float(f.get(k, 0.0)) for k in PRUNE_FEATURES
-            )
+            z = b + sum(float(w.get(k, 0.0)) * float(f.get(k, 0.0)) for k in PRUNE_FEATURES)
             z = max(-60.0, min(60.0, z))
             scores[edge] = round(1.0 / (1.0 + math.exp(-z)), 4)
         return scores
 
     def _build_graph(self, project: str):
         import networkx as nx
+
         graph = nx.DiGraph()
         for ent in self._store.list_entities(project=project):
             graph.add_node(ent["id"], **ent)
@@ -323,9 +331,7 @@ class GNNPruner:
                 z = model(x, data.edge_index)
                 adj_hat = torch.sigmoid(z @ z.T)
                 ei = data.edge_index
-                loss = F.binary_cross_entropy(
-                    adj_hat[ei[0], ei[1]], torch.ones(ei.shape[1])
-                )
+                loss = F.binary_cross_entropy(adj_hat[ei[0], ei[1]], torch.ones(ei.shape[1]))
                 loss.backward()
                 opt.step()
 
@@ -381,7 +387,8 @@ class GNNPruner:
             feats = np.concatenate([pe, deg_feat], axis=1).astype(np.float32)
             logger.debug(
                 "GNNPruner: using Laplacian PE features (n=%d, dim=%d)",
-                n, feats.shape[1],
+                n,
+                feats.shape[1],
             )
             return torch.from_numpy(feats)
         except Exception as exc:  # noqa: BLE001

@@ -23,18 +23,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
+      - name: Install uv and Python ${{ matrix.python }}
         uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
-
-      - name: Set up Python ${{ matrix.python }}
-        run: uv python install ${{ matrix.python }}
+          python-version: ${{ matrix.python }}
 
       - name: Install dependencies
-        run: |
-          uv venv
-          uv sync --extra dev
+        run: uv sync --extra dev
 
       - name: Lint (ruff)
         run: uv run ruff check .

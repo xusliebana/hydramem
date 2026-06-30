@@ -4,6 +4,7 @@ Sends only anonymised aggregate numbers to a remote endpoint
 when the user has explicitly opted in.  No content, no queries, no code.
 Disabled by default.
 """
+
 from __future__ import annotations
 
 import json
@@ -53,6 +54,7 @@ def send_aggregate_if_opted_in(stats: dict) -> bool:
 
     try:
         import requests  # type: ignore  # noqa: PLC0415
+
         from hydramem import __version__ as ver  # type: ignore  # noqa: PLC0415
     except ImportError:
         ver = "0.1.0"
@@ -60,9 +62,7 @@ def send_aggregate_if_opted_in(stats: dict) -> bool:
     payload = {
         "version": ver,
         "date": date.today().isoformat(),
-        "total_tokens_saved": int(
-            stats.get("total_baseline", 0) - stats.get("total_injected", 0)
-        ),
+        "total_tokens_saved": int(stats.get("total_baseline", 0) - stats.get("total_injected", 0)),
         "avg_vog_score": round(float(stats.get("avg_vog", 0.0)), 4),
         "total_calls": int(stats.get("total_calls", 0)),
     }

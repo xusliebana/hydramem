@@ -1,4 +1,5 @@
 """Token counting — single responsibility: count tokens in text."""
+
 from __future__ import annotations
 
 import tiktoken

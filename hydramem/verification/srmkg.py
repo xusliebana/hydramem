@@ -10,6 +10,7 @@ When a project has a trained weights file at
 ``~/.hydramem/projects/<project>/srmkg_weights.json``, :class:`SRMKGScorer`
 loads it transparently — the API contract is unchanged.
 """
+
 from __future__ import annotations
 
 import json
@@ -103,9 +104,7 @@ class SRMKGScorer:
         self._w_type_boost = weight_type_boost
         self._penalty_isolated = penalty_isolated
         self._project = project
-        self._learned: dict | None = (
-            load_project_weights(project) if project else None
-        )
+        self._learned: dict | None = load_project_weights(project) if project else None
 
     @property
     def is_calibrated(self) -> bool:
@@ -125,9 +124,7 @@ class SRMKGScorer:
         total = max(degree_from + degree_to - common_neighbors, 1)
         jaccard = common_neighbors / total
         isolated = 1.0 if (degree_from == 0 or degree_to == 0) else 0.0
-        type_boost = (
-            1.0 if relation.relation_type not in ("related_to", "unknown") else 0.0
-        )
+        type_boost = 1.0 if relation.relation_type not in ("related_to", "unknown") else 0.0
         base = relation.confidence if relation.confidence > 0.0 else 0.5
         return base, jaccard, type_boost, isolated
 
@@ -138,9 +135,7 @@ class SRMKGScorer:
         degree_from: int = 1,
         degree_to: int = 1,
     ) -> float:
-        return self.score_with_breakdown(
-            relation, common_neighbors, degree_from, degree_to
-        ).score
+        return self.score_with_breakdown(relation, common_neighbors, degree_from, degree_to).score
 
     def score_with_breakdown(
         self,
@@ -174,12 +169,7 @@ class SRMKGScorer:
         else:
             named = self._w_type_boost * type_boost
             penalty = self._penalty_isolated * isolated
-            raw = (
-                base * self._w_base
-                + jaccard * self._w_jaccard
-                + named
-                - penalty
-            )
+            raw = base * self._w_base + jaccard * self._w_jaccard + named - penalty
             score = max(0.0, min(1.0, raw))
 
         return ScoreBreakdown(
@@ -197,9 +187,7 @@ class SRMKGScorer:
         degree_from: int = 1,
         degree_to: int = 1,
     ) -> VerificationResult:
-        breakdown = self.score_with_breakdown(
-            relation, common_neighbors, degree_from, degree_to
-        )
+        breakdown = self.score_with_breakdown(relation, common_neighbors, degree_from, degree_to)
         s = breakdown.score
         if s >= self._accept:
             result = VerificationResult(accepted=True, score=s, level="srmkg_high")

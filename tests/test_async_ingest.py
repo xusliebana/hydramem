@@ -1,4 +1,5 @@
 """Tests for the AsyncIngestWorker checkpointing flow."""
+
 from __future__ import annotations
 
 import asyncio

@@ -23,6 +23,7 @@ RAG stacks usually inject *more* than this baseline, so the reported savings
 Use ``hydramem stats --raw`` to see the unaggregated baseline / injected
 token counts per call.
 """
+
 from __future__ import annotations
 
 import tiktoken
@@ -50,6 +51,7 @@ def estimate_naive_rag_tokens(
     -------
     int – token count for query + top-k chunk texts concatenated.
     """
+
     def _sim(c) -> float:
         if hasattr(c, "similarity"):
             return float(c.similarity)

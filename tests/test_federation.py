@@ -1,8 +1,8 @@
 """Tests for federated signed exports / imports."""
+
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 
@@ -28,15 +28,23 @@ class _FakeStore:
         return list(self.chunks)
 
     def add_entity(self, entity: Entity) -> None:
-        self.entities.append({"id": entity.id, "name": entity.name, "type": entity.type, "project": entity.project})
+        self.entities.append(
+            {"id": entity.id, "name": entity.name, "type": entity.type, "project": entity.project}
+        )
 
     def add_relation(self, relation: Relation) -> None:
-        self.relations.append({
-            "from": relation.from_entity, "to": relation.to_entity,
-            "relation_type": relation.relation_type, "confidence": relation.confidence,
-            "verified": relation.verified, "session_id": relation.session_id,
-            "origin_tool": relation.origin_tool, "created_at": relation.created_at,
-        })
+        self.relations.append(
+            {
+                "from": relation.from_entity,
+                "to": relation.to_entity,
+                "relation_type": relation.relation_type,
+                "confidence": relation.confidence,
+                "verified": relation.verified,
+                "session_id": relation.session_id,
+                "origin_tool": relation.origin_tool,
+                "created_at": relation.created_at,
+            }
+        )
 
     def add_chunk(self, chunk) -> None:
         self.chunks.append(chunk)

@@ -1,4 +1,5 @@
 """Tests for SR-MKG learned-weights calibration."""
+
 from __future__ import annotations
 
 import json
@@ -27,16 +28,26 @@ def _seed_decisions(n_pos: int, n_neg: int, project: str = "default") -> None:
         log_srmkg_decision(
             project=project,
             relation_type="causes",
-            base=0.8, jaccard=0.7, type_boost=1.0, isolated=0.0,
-            score=0.85, final_label=1, source="vog",
+            base=0.8,
+            jaccard=0.7,
+            type_boost=1.0,
+            isolated=0.0,
+            score=0.85,
+            final_label=1,
+            source="vog",
         )
     # Negative examples: low everything, high isolated.
     for _ in range(n_neg):
         log_srmkg_decision(
             project=project,
             relation_type="related_to",
-            base=0.2, jaccard=0.05, type_boost=0.0, isolated=1.0,
-            score=0.1, final_label=0, source="srmkg",
+            base=0.2,
+            jaccard=0.05,
+            type_boost=0.0,
+            isolated=1.0,
+            score=0.1,
+            final_label=0,
+            source="srmkg",
         )
 
 
@@ -54,9 +65,7 @@ def test_calibrate_refuses_single_class(sandbox):
 
 def test_calibrate_writes_weights_and_improves_separation(sandbox):
     _seed_decisions(40, 40, project="default")
-    report = cal_mod.calibrate(
-        project="default", min_samples=50, epochs=300, lr=0.2
-    )
+    report = cal_mod.calibrate(project="default", min_samples=50, epochs=300, lr=0.2)
     assert report.saved_path is not None
     payload = json.loads((sandbox / "default" / "srmkg_weights.json").read_text())
     assert set(payload["weights"].keys()) == {"base", "jaccard", "type_boost", "isolated"}

@@ -4,6 +4,7 @@ All concrete providers implement this interface.  Callers depend only on this
 contract, never on a specific implementation (DIP).  New providers can be
 added without touching existing code (OCP).
 """
+
 from __future__ import annotations
 
 from typing import Protocol, runtime_checkable

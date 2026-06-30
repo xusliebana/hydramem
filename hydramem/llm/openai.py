@@ -1,4 +1,5 @@
 """OpenAI LLM provider — external API, key sourced from env var only."""
+
 from __future__ import annotations
 
 import os
@@ -28,9 +29,7 @@ class OpenAIProvider:
     def _api_key(self) -> str:
         key = os.getenv(self._api_key_env) or os.getenv("OPENAI_API_KEY", "")
         if not key:
-            raise RuntimeError(
-                f"OpenAI API key not found. Set the {self._api_key_env!r} env var."
-            )
+            raise RuntimeError(f"OpenAI API key not found. Set the {self._api_key_env!r} env var.")
         return key
 
     def complete(self, prompt: str, model: str | None = None) -> str:

@@ -8,10 +8,11 @@ proposed**. Earlier versions emitted random ``co_mentioned`` placeholders
 between adjacent entities, which polluted the graph and inflated
 ``relations_proposed`` / ``relations_accepted`` in ``garden-status``.
 """
+
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from hydramem.core.logging import get_logger
 from hydramem.core.types import Relation
@@ -106,7 +107,7 @@ class RelationInferrer:
                         project=project,
                         session_id=session_id,
                         origin_tool="night_gardener",
-                        created_at=datetime.now(timezone.utc).isoformat(),
+                        created_at=datetime.now(UTC).isoformat(),
                     )
                 )
         return relations

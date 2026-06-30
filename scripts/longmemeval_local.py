@@ -20,6 +20,7 @@ Usage:
     uv run python scripts/longmemeval_local.py --n 100 --k 20 \
         --output reports/longmemeval-local.json
 """
+
 from __future__ import annotations
 
 import argparse
@@ -37,8 +38,12 @@ class _PassthroughPipeline:
 
     def verify_chunks(self, chunks: list, query: str = "") -> dict:
         return {
-            "filtered": list(chunks), "verified": [], "rejected_vector": [],
-            "rejected_srmkg": [], "rejected_vog": [], "vog_scores": [],
+            "filtered": list(chunks),
+            "verified": [],
+            "rejected_vector": [],
+            "rejected_srmkg": [],
+            "rejected_vog": [],
+            "vog_scores": [],
         }
 
 
@@ -87,15 +92,14 @@ def run(n: int, k: int, *, variant: str = "s", with_vog: bool = False) -> dict:
     from hydramem.storage.graph.networkx_repo import NetworkXGraphRepository
     from hydramem.storage.vector.memory_repo import InMemoryVectorRepository
 
-    path = hf_hub_download(
-        "xiaowu0162/longmemeval", f"longmemeval_{variant}", repo_type="dataset"
-    )
+    path = hf_hub_download("xiaowu0162/longmemeval", f"longmemeval_{variant}", repo_type="dataset")
     data = json.load(open(path))[:n]
     cfg = load_config()
     # Load the embedder ONCE and share it across every question (the model
     # reload per question is what makes a naive driver crawl).
     embedder = EmbeddingService(
-        cfg.embedding_model, dim=cfg.embedding_dim,
+        cfg.embedding_model,
+        dim=cfg.embedding_dim,
         backend=getattr(cfg, "embedding_backend", None),
     )
 
@@ -108,14 +112,14 @@ def run(n: int, k: int, *, variant: str = "s", with_vog: bool = False) -> dict:
         gold = set(q["answer_session_ids"])
         hay.append(len(sessions))
 
-        store = KnowledgeStore(
-            graph=NetworkXGraphRepository(), vector=InMemoryVectorRepository()
-        )
+        store = KnowledgeStore(graph=NetworkXGraphRepository(), vector=InMemoryVectorRepository())
         pipe = IngestionPipeline(store=store, config=cfg, embedder=embedder)
         for sid, turns in zip(sids, sessions, strict=False):
             pipe.ingest_text(_session_text(turns), source=sid, project="lme")
         svc = SearchService(
-            store=store, config=cfg, embedder=embedder,
+            store=store,
+            config=cfg,
+            embedder=embedder,
             pipeline=None if with_vog else _PassthroughPipeline(),
         )
 
@@ -142,10 +146,13 @@ def run(n: int, k: int, *, variant: str = "s", with_vog: bool = False) -> dict:
         "setting": "faithful per-question haystack (native LongMemEval setting)",
         "source": f"huggingface: xiaowu0162/longmemeval (longmemeval_{variant})",
         "embedder": f"{getattr(cfg, 'embedding_backend', '?')}:"
-                    f"{getattr(cfg, 'embedding_model', '?')}",
+        f"{getattr(cfg, 'embedding_model', '?')}",
         "questions": len(data),
         "haystack_sessions_per_question": {
-            "min": min(hay), "median": int(st.median(hay)), "max": max(hay)},
+            "min": min(hay),
+            "median": int(st.median(hay)),
+            "max": max(hay),
+        },
         "retrieve_k_chunks": k,
         "metric": "session-level Recall over top-5 distinct sessions; MRR",
         "judge": False,
@@ -161,8 +168,10 @@ def run(n: int, k: int, *, variant: str = "s", with_vog: bool = False) -> dict:
         ms = lat[name]
         report["conditions"][name] = {
             "description": desc,
-            "recall_at_1": agg(name, "r@1"), "recall_at_3": agg(name, "r@3"),
-            "recall_at_5": agg(name, "r@5"), "mrr": agg(name, "rr"),
+            "recall_at_1": agg(name, "r@1"),
+            "recall_at_3": agg(name, "r@3"),
+            "recall_at_5": agg(name, "r@5"),
+            "mrr": agg(name, "rr"),
             "p50_latency_ms": round(_percentile(ms, 50), 1),
             "p95_latency_ms": round(_percentile(ms, 95), 1),
         }
@@ -172,14 +181,18 @@ def run(n: int, k: int, *, variant: str = "s", with_vog: bool = False) -> dict:
 def _print_table(report: dict) -> None:
     h = report["haystack_sessions_per_question"]
     print(f"\n# {report['benchmark']} — faithful per-question haystack")
-    print(f"- questions: {report['questions']} | sessions/q "
-          f"{h['min']}/{h['median']}/{h['max']} | embedder {report['embedder']} | "
-          f"verify {report['verification']} | {report['elapsed_seconds']}s")
+    print(
+        f"- questions: {report['questions']} | sessions/q "
+        f"{h['min']}/{h['median']}/{h['max']} | embedder {report['embedder']} | "
+        f"verify {report['verification']} | {report['elapsed_seconds']}s"
+    )
     print("| Condition | R@1 | R@3 | R@5 | MRR | p50 ms | p95 ms |")
     print("|-----------|-----|-----|-----|-----|--------|--------|")
     for name, c in report["conditions"].items():
-        print(f"| {name} | {c['recall_at_1']} | {c['recall_at_3']} | {c['recall_at_5']} "
-              f"| {c['mrr']} | {c['p50_latency_ms']:.0f} | {c['p95_latency_ms']:.0f} |")
+        print(
+            f"| {name} | {c['recall_at_1']} | {c['recall_at_3']} | {c['recall_at_5']} "
+            f"| {c['mrr']} | {c['p50_latency_ms']:.0f} | {c['p95_latency_ms']:.0f} |"
+        )
 
 
 def main() -> None:
@@ -187,8 +200,12 @@ def main() -> None:
     ap.add_argument("--n", type=int, default=50, help="Number of questions")
     ap.add_argument("--k", type=int, default=20, help="Chunks retrieved per query")
     ap.add_argument("--variant", default="s", choices=["s", "oracle", "m"])
-    ap.add_argument("--with-vog", dest="with_vog", action="store_true",
-                    help="Include VoG verification (slower; needs a local LLM)")
+    ap.add_argument(
+        "--with-vog",
+        dest="with_vog",
+        action="store_true",
+        help="Include VoG verification (slower; needs a local LLM)",
+    )
     ap.add_argument("--output", default=None, help="Write the JSON report here")
     args = ap.parse_args()
 

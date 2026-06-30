@@ -1,4 +1,5 @@
 """Tests for grouped Night Gardener session persistence."""
+
 from __future__ import annotations
 
 from hydramem.garden.repository import SessionRepository

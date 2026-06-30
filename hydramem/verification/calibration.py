@@ -11,6 +11,7 @@ same one the heuristic uses.
 
 See ``docs/internal/future_work/learned-srmkg-weights.md``.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -117,10 +118,9 @@ def calibrate(
         p = _sigmoid(z)
         # log-loss + L2 (excludes intercept)
         eps = 1e-12
-        loss = (
-            -np.mean(y_train * np.log(p + eps) + (1 - y_train) * np.log(1 - p + eps))
-            + 0.5 * l2 * float(np.dot(w, w)) / max(n, 1)
-        )
+        loss = -np.mean(
+            y_train * np.log(p + eps) + (1 - y_train) * np.log(1 - p + eps)
+        ) + 0.5 * l2 * float(np.dot(w, w)) / max(n, 1)
         grad_w = (x_train.T @ (p - y_train)) / n + l2 * w / max(n, 1)
         grad_b = float(np.mean(p - y_train))
         w -= lr * grad_w
@@ -149,7 +149,10 @@ def calibrate(
         saved_path = str(path)
         logger.info(
             "SR-MKG calibrated for project=%s n_train=%d auc=%.3f → %s",
-            project, len(y_train), auc, saved_path,
+            project,
+            len(y_train),
+            auc,
+            saved_path,
         )
 
     return CalibrationReport(

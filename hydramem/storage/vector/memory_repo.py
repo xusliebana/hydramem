@@ -1,4 +1,5 @@
 """In-memory vector repository — pure-Python fallback (no persistence)."""
+
 from __future__ import annotations
 
 import math

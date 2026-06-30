@@ -1,4 +1,5 @@
 """Core domain primitives — no side-effects, no external dependencies beyond stdlib."""
+
 from hydramem.core.config import Config, load_config
 from hydramem.core.logging import get_logger
 from hydramem.core.tokens import count_tokens

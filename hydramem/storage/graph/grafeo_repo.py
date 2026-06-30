@@ -16,6 +16,7 @@ Design choices:
     chunks by user-controlled strings (``Entity.id``, ``Chunk.id``).  We keep
     a bidirectional in-memory index that is rebuilt from the DB on open.
 """
+
 from __future__ import annotations
 
 import json
@@ -52,11 +53,11 @@ class GrafeoGraphRepository:
                 from grafeo import GrafeoDB  # type: ignore
             except ImportError as exc:  # pragma: no cover
                 raise ImportError(
-                    "grafeo not installed — `pip install grafeo` "
-                    "(requires Python ≥ 3.12)"
+                    "grafeo not installed — `pip install grafeo` (requires Python ≥ 3.12)"
                 ) from exc
 
             from pathlib import Path
+
             Path(db_path).parent.mkdir(parents=True, exist_ok=True)
             db = GrafeoDB(db_path)
 
@@ -170,9 +171,7 @@ class GrafeoGraphRepository:
             }
             self._db.create_edge(src, dst, relation.relation_type, props)
 
-    def delete_relation(
-        self, from_entity: str, to_entity: str, relation_type: str
-    ) -> bool:
+    def delete_relation(self, from_entity: str, to_entity: str, relation_type: str) -> bool:
         with self._lock:
             src = self._entity_ix.get(from_entity)
             dst = self._entity_ix.get(to_entity)
@@ -214,8 +213,17 @@ class GrafeoGraphRepository:
             if isinstance(row, dict):
                 rec = dict(row)
             else:
-                cols = ["from", "to", "relation_type", "confidence", "verified",
-                        "session_id", "origin_tool", "created_at", "qualifiers"]
+                cols = [
+                    "from",
+                    "to",
+                    "relation_type",
+                    "confidence",
+                    "verified",
+                    "session_id",
+                    "origin_tool",
+                    "created_at",
+                    "qualifiers",
+                ]
                 rec = dict(zip(cols, row, strict=False))
             raw_q = rec.get("qualifiers")
             if isinstance(raw_q, str) and raw_q:
@@ -287,8 +295,7 @@ class GrafeoGraphRepository:
             return []
         try:
             rows = self._db.execute_cypher(
-                f"MATCH (c:{_L_CHUNK})-[:{_E_MENTIONS}]->(e) "
-                "WHERE id(e) = $eid RETURN c",
+                f"MATCH (c:{_L_CHUNK})-[:{_E_MENTIONS}]->(e) WHERE id(e) = $eid RETURN c",
                 {"eid": internal},
             )
             return [self._chunk_from_row(row.get("c")) for row in rows]

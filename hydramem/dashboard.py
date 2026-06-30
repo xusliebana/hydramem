@@ -10,6 +10,7 @@ Read-only by design: no endpoint writes to the graph or the telemetry DB.
 Run with ``python -m hydramem.dashboard``. The server binds to localhost by
 default; pass ``--host`` to expose it elsewhere.
 """
+
 from __future__ import annotations
 
 import argparse

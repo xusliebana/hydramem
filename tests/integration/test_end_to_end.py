@@ -4,6 +4,7 @@ Exercises the full HydraMem pipeline using only in-process backends
 (NetworkX graph + in-memory vector store + deterministic stub embedder),
 so it runs in <1 s on CI without any model download.
 """
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -103,9 +104,7 @@ def test_ingest_search_gardener_prune_e2e(tmp_path, cfg, store, session_repo, st
     # ── Act 4: gardener cycle with mocked LLM produces verifiable output ────
     fake_llm = MagicMock()
     # Honest LLM response that the inferrer can parse.
-    fake_llm.complete.return_value = (
-        "HydraMem –[verifies]→ Night Gardener | CONFIDENCE: 0.9\n"
-    )
+    fake_llm.complete.return_value = "HydraMem –[verifies]→ Night Gardener | CONFIDENCE: 0.9\n"
     inferrer = RelationInferrer(fake_llm)
 
     # Pre-seed a session so the inferrer has text to work with.
@@ -117,7 +116,7 @@ def test_ingest_search_gardener_prune_e2e(tmp_path, cfg, store, session_repo, st
                 "ts": "2026-05-07T10:00:00+00:00",
                 "tool_name": "hydra_search",
                 "summary": "Query: how does the Night Gardener relate to HydraMem? "
-                            "Grounded context: HydraMem verifies relations via SR-MKG.",
+                "Grounded context: HydraMem verifies relations via SR-MKG.",
             },
         }
     )
@@ -130,7 +129,7 @@ def test_ingest_search_gardener_prune_e2e(tmp_path, cfg, store, session_repo, st
                 "ts": "2026-05-07T11:00:00+00:00",
                 "tool_name": "hydra_search",
                 "summary": "Query: how does the Night Gardener relate to HydraMem? "
-                            "Grounded context: HydraMem verifies relations via SR-MKG.",
+                "Grounded context: HydraMem verifies relations via SR-MKG.",
             },
         }
     )

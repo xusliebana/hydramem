@@ -9,6 +9,7 @@ Concurrency is bounded with a semaphore and the underlying synchronous
 ``IngestionPipeline.ingest_file`` call is dispatched to a thread so the loop
 never blocks on the tokenizer or embedder.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -86,9 +87,7 @@ class AsyncIngestWorker:
                 return
             async with self._sem:
                 try:
-                    result = await asyncio.to_thread(
-                        self._pipeline.ingest_file, str(path), project
-                    )
+                    result = await asyncio.to_thread(self._pipeline.ingest_file, str(path), project)
                 except Exception as exc:  # noqa: BLE001
                     logger.error("AsyncIngestWorker failed on %s: %s", path, exc)
                     progress.files_failed += 1

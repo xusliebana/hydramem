@@ -1,4 +1,5 @@
 """Night Gardener — autonomous offline knowledge refinement."""
+
 from hydramem.garden.gardener import NightGardener
 from hydramem.garden.inferrer import RelationInferrer
 from hydramem.garden.pruner import KnowledgePruner

@@ -1,4 +1,5 @@
 """ConflictChecker — detects contradictions between two text passages."""
+
 from __future__ import annotations
 
 from hydramem.core.logging import get_logger
@@ -55,6 +56,7 @@ class ConflictChecker:
 
         confidence = 0.7
         import re
+
         m = re.search(r"CONFIDENCE:\s*([0-9.]+)", answer, re.IGNORECASE)
         if m:
             try:

@@ -5,6 +5,7 @@ Adding a new provider only requires:
   2. Register it in _REGISTRY below
   3. No changes to callers
 """
+
 from __future__ import annotations
 
 from hydramem.core.config import Config, load_config

@@ -1,4 +1,5 @@
 """Tests for Night Gardener session prioritization."""
+
 from __future__ import annotations
 
 
@@ -88,16 +89,16 @@ def test_consolidation_boosts_reused_and_decays_isolates():
     )
     out = gardener._consolidate("p")
 
-    assert out["entities_boosted"] == 1          # 'hot' boosted
-    assert out["entities_decayed"] == 1          # 'cold' decayed (aged isolate)
-    assert "hot" in out["protected_ids"]         # reused → prune-protected
+    assert out["entities_boosted"] == 1  # 'hot' boosted
+    assert out["entities_decayed"] == 1  # 'cold' decayed (aged isolate)
+    assert "hot" in out["protected_ids"]  # reused → prune-protected
     assert "cold" not in out["protected_ids"]
-    assert "fresh" not in out["protected_ids"]   # recent single-touch untouched
+    assert "fresh" not in out["protected_ids"]  # recent single-touch untouched
 
     deltas = dict(adjust_calls)
-    assert deltas["hot"] > 0                      # boost is positive
-    assert deltas["cold"] < 0                     # decay is negative
-    assert "fresh" not in deltas                  # within decay window → no change
+    assert deltas["hot"] > 0  # boost is positive
+    assert deltas["cold"] < 0  # decay is negative
+    assert "fresh" not in deltas  # within decay window → no change
 
 
 def test_consolidation_disabled_is_noop():
@@ -113,9 +114,7 @@ def test_consolidation_disabled_is_noop():
         pipeline=MagicMock(),
         pruner=MagicMock(),
         config=cfg,
-        reuse_fn=lambda *a, **k: [
-            {"entity_id": "x", "sessions_touched": 9, "days_since": 0.0}
-        ],
+        reuse_fn=lambda *a, **k: [{"entity_id": "x", "sessions_touched": 9, "days_since": 0.0}],
     )
     out = gardener._consolidate("p")
     assert out == {"entities_boosted": 0, "entities_decayed": 0, "protected_ids": set()}
@@ -131,14 +130,14 @@ def test_pruner_protects_reused_entities():
         {"id": "iso1", "name": "Iso1"},
         {"id": "iso2", "name": "Iso2"},
     ]
-    store.get_entity_neighbors.return_value = []   # both isolated
+    store.get_entity_neighbors.return_value = []  # both isolated
     store.get_chunks_near_entity.return_value = []
     store.delete_entity.return_value = True
 
     result = KnowledgePruner(store).prune(project="p", protected_ids={"iso1"})
 
-    assert result["pruned_entities"] == 1          # only iso2 deleted
-    assert result["prune_protected"] == 1          # iso1 protected from prune
+    assert result["pruned_entities"] == 1  # only iso2 deleted
+    assert result["prune_protected"] == 1  # iso1 protected from prune
     store.delete_entity.assert_called_once_with("iso2")
 
 
@@ -148,9 +147,7 @@ def test_adjust_confidences_clamps_outgoing_relations():
     from hydramem.storage.graph.networkx_repo import NetworkXGraphRepository
     from hydramem.storage.vector.memory_repo import InMemoryVectorRepository
 
-    store = KnowledgeStore(
-        graph=NetworkXGraphRepository(), vector=InMemoryVectorRepository()
-    )
+    store = KnowledgeStore(graph=NetworkXGraphRepository(), vector=InMemoryVectorRepository())
     store.add_entity(Entity(id="a", name="A", project="p"))
     store.add_entity(Entity(id="b", name="B", project="p"))
     store.add_relation(

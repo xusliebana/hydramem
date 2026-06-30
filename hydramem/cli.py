@@ -992,7 +992,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_tp.add_argument("--lr", type=float, default=0.1)
     p_tp.add_argument("--epochs", type=int, default=500)
     p_tp.add_argument(
-        "--dry-run", dest="dry_run", action="store_true",
+        "--dry-run",
+        dest="dry_run",
+        action="store_true",
         help="Train but do not write the weights file",
     )
 

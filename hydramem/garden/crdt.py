@@ -14,6 +14,7 @@ sessions are append-only and entries are idempotent. If two replicas saw the
 same observation, fingerprint-equality dedupes them; if they saw different
 observations, both survive.
 """
+
 from __future__ import annotations
 
 import json
@@ -33,7 +34,10 @@ def merge_sessions(local: list[dict], remote: list[dict]) -> list[dict]:
 
     for source in (local, remote):
         for session in source:
-            key = (session.get("project", "default"), session.get("session_id") or session.get("id") or "")
+            key = (
+                session.get("project", "default"),
+                session.get("session_id") or session.get("id") or "",
+            )
             existing = by_key.get(key)
             if existing is None:
                 by_key[key] = SessionRepository._normalise_session(session)

@@ -12,11 +12,12 @@ distinct ``HYDRAMEM_PROJECT`` and storage directory.
 
 See ``docs/architecture.md#scaling`` for details.
 """
+
 from __future__ import annotations
 
 import os
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from fastmcp import FastMCP  # type: ignore
@@ -106,11 +107,11 @@ def _persist_session_entry(
         {
             "project": project,
             "session_id": session_id,
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
             "tool_name": tool_name,
             "query": query.strip(),
             "entry": {
-                "ts": datetime.now(timezone.utc).isoformat(),
+                "ts": datetime.now(UTC).isoformat(),
                 "tool_name": tool_name,
                 "summary": normalized_summary[:4000],
             },
@@ -122,10 +123,9 @@ def _persist_session_entry(
 # Tool 1: priming_context
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
-def priming_context_tool(
-    query: str, k: int = 3, project: str = "", session_id: str = ""
-) -> dict:
+def priming_context_tool(query: str, k: int = 3, project: str = "", session_id: str = "") -> dict:
     """Return top-k chunks + immediate graph neighbours to seed agent context."""
     start = time.time()
     proj, sid = _project(project), _session(session_id)
@@ -133,16 +133,14 @@ def priming_context_tool(
     _persist_session_entry(
         tool_name="priming_context",
         query=query,
-        summary=(
-            f"Query: {query.strip()}\n"
-            "Grounded context:\n"
-            f"{result.get('context', '').strip()}"
-        ),
+        summary=(f"Query: {query.strip()}\nGrounded context:\n{result.get('context', '').strip()}"),
         project=proj,
         session_id=sid,
     )
     log_event(
-        project=proj, tool_name="priming_context", session_id=sid,
+        project=proj,
+        tool_name="priming_context",
+        session_id=sid,
         llm_preset=config.llm_preset,
         tokens_injected=count_tokens(result["context"]),
         tokens_baseline=estimate_naive_rag_tokens(
@@ -157,6 +155,7 @@ def priming_context_tool(
 # ---------------------------------------------------------------------------
 # Tool 2: expand_context
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def expand_context_tool(
@@ -178,7 +177,9 @@ def expand_context_tool(
         ),
     )
     log_event(
-        project=proj, tool_name="expand_context", session_id=sid,
+        project=proj,
+        tool_name="expand_context",
+        session_id=sid,
         chunks_total=len(result["chunks"]),
         latency_ms=int((time.time() - start) * 1000),
     )
@@ -188,6 +189,7 @@ def expand_context_tool(
 # ---------------------------------------------------------------------------
 # Tool 3: hydra_search
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def hydra_search_tool(
@@ -221,15 +223,15 @@ def hydra_search_tool(
         tool_name="hydra_search",
         query=query,
         summary=(
-            f"Query: {query.strip()}\n"
-            "Grounded context:\n"
-            f"{result.get('final_context', '').strip()}"
+            f"Query: {query.strip()}\nGrounded context:\n{result.get('final_context', '').strip()}"
         ),
         project=proj,
         session_id=sid,
     )
     log_event(
-        project=proj, tool_name="hydra_search", session_id=sid,
+        project=proj,
+        tool_name="hydra_search",
+        session_id=sid,
         llm_preset=config.llm_preset,
         tokens_injected=count_tokens(result["final_context"]),
         tokens_baseline=estimate_naive_rag_tokens(
@@ -248,6 +250,7 @@ def hydra_search_tool(
 # ---------------------------------------------------------------------------
 # Tool 4: trace_path
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def trace_path_tool(
@@ -269,14 +272,19 @@ def trace_path_tool(
         ),
         query=f"Trace path from {from_entity} to {to_entity}",
     )
-    log_event(project=proj, tool_name="trace_path", session_id=sid,
-              latency_ms=int((time.time() - start) * 1000))
+    log_event(
+        project=proj,
+        tool_name="trace_path",
+        session_id=sid,
+        latency_ms=int((time.time() - start) * 1000),
+    )
     return result
 
 
 # ---------------------------------------------------------------------------
 # Tool 5: verify_relation
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def verify_relation_tool(
@@ -293,15 +301,21 @@ def verify_relation_tool(
     start = time.time()
     proj, sid = _project(project), _session(session_id)
     rel = Relation(
-        from_entity=from_entity, to_entity=to_entity,
-        relation_type=relation_type, confidence=confidence,
-        source_text=source_text, target_text=target_text, project=proj,
-        session_id=sid, origin_tool="verify_relation",
-        created_at=datetime.now(timezone.utc).isoformat(),
+        from_entity=from_entity,
+        to_entity=to_entity,
+        relation_type=relation_type,
+        confidence=confidence,
+        source_text=source_text,
+        target_text=target_text,
+        project=proj,
+        session_id=sid,
+        origin_tool="verify_relation",
+        created_at=datetime.now(UTC).isoformat(),
     )
     vr = _svc_verif().verify(rel)
     result = {
-        "accepted": vr.accepted, "srmkg_score": vr.score,
+        "accepted": vr.accepted,
+        "srmkg_score": vr.score,
         "vog_score": vr.score if vr.level == "vog" else None,
         "level": vr.level,
     }
@@ -318,7 +332,9 @@ def verify_relation_tool(
         ),
     )
     log_event(
-        project=proj, tool_name="verify_relation", session_id=sid,
+        project=proj,
+        tool_name="verify_relation",
+        session_id=sid,
         llm_preset=config.llm_preset,
         vog_score=vr.score,
         was_hallucination_blocked=0 if vr.accepted else 1,
@@ -331,17 +347,18 @@ def verify_relation_tool(
 # Tool 6: ingest_markdown
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
-def ingest_markdown(
-    file_path: str, project: str = "", session_id: str = ""
-) -> dict:
+def ingest_markdown(file_path: str, project: str = "", session_id: str = "") -> dict:
     """Ingest a single Markdown file into the knowledge base."""
     start = time.time()
     proj, sid = _project(project), _session(session_id)
     result = _svc_ingest().ingest_file(file_path, project=proj)
     _svc_search().invalidate_cache(proj)
     log_event(
-        project=proj, tool_name="ingest_markdown", session_id=sid,
+        project=proj,
+        tool_name="ingest_markdown",
+        session_id=sid,
         chunks_total=result.get("chunks_added", 0),
         latency_ms=int((time.time() - start) * 1000),
         metadata={"file": result.get("file"), "doc_id": result.get("doc_id")},
@@ -353,6 +370,7 @@ def ingest_markdown(
 # Tool 7: ingest_directory
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
 def ingest_directory_tool(
     directory: str, project: str = "", recursive: bool = True, session_id: str = ""
@@ -363,7 +381,9 @@ def ingest_directory_tool(
     result = _svc_ingest().ingest_directory(directory, project=proj, recursive=recursive)
     _svc_search().invalidate_cache(proj)
     log_event(
-        project=proj, tool_name="ingest_directory", session_id=sid,
+        project=proj,
+        tool_name="ingest_directory",
+        session_id=sid,
         chunks_total=result.get("chunks_added", 0),
         latency_ms=int((time.time() - start) * 1000),
         metadata={"files_processed": result.get("files_processed")},
@@ -375,10 +395,9 @@ def ingest_directory_tool(
 # Tool 18: remember  (accumulate knowledge mid-conversation)
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
-def remember(
-    text: str, source: str = "chat-note", project: str = "", session_id: str = ""
-) -> dict:
+def remember(text: str, source: str = "chat-note", project: str = "", session_id: str = "") -> dict:
     """Persist a free-text note/fact into the knowledge base during a chat.
 
     Unlike a plain vector store, the note flows through the full HydraMem
@@ -392,7 +411,9 @@ def remember(
     result = _svc_ingest().ingest_text(text, source=source, project=proj)
     _svc_search().invalidate_cache(proj)
     log_event(
-        project=proj, tool_name="remember", session_id=sid,
+        project=proj,
+        tool_name="remember",
+        session_id=sid,
         chunks_total=result.get("chunks_added", 0),
         latency_ms=int((time.time() - start) * 1000),
         metadata={"source": source, "doc_id": result.get("doc_id")},
@@ -403,6 +424,7 @@ def remember(
 # ---------------------------------------------------------------------------
 # Tool 7a: ingest_prechunked  (agent-driven / BYO-extraction)
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def ingest_prechunked(
@@ -443,7 +465,9 @@ def ingest_prechunked(
     )
     _svc_search().invalidate_cache(proj)
     log_event(
-        project=proj, tool_name="ingest_prechunked", session_id=sid,
+        project=proj,
+        tool_name="ingest_prechunked",
+        session_id=sid,
         chunks_total=result.get("chunks_added", 0),
         latency_ms=int((time.time() - start) * 1000),
         metadata={
@@ -464,6 +488,7 @@ def ingest_prechunked(
 # ---------------------------------------------------------------------------
 # Tool 7b: submit_session_extraction  (agent-closes-session knowledge dump)
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def submit_session_extraction(
@@ -489,7 +514,9 @@ def submit_session_extraction(
         project=proj,
     )
     log_event(
-        project=proj, tool_name="submit_session_extraction", session_id=sid,
+        project=proj,
+        tool_name="submit_session_extraction",
+        session_id=sid,
         latency_ms=int((time.time() - start) * 1000),
         metadata={
             "entities_added": result.get("entities_added", 0),
@@ -505,6 +532,7 @@ def submit_session_extraction(
 # Tool 8: list_entities
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
 def list_entities_tool(project: str = "", session_id: str = "") -> dict:
     """List all entities in the knowledge graph for a given project."""
@@ -516,6 +544,7 @@ def list_entities_tool(project: str = "", session_id: str = "") -> dict:
 # ---------------------------------------------------------------------------
 # Tool 9: create_relation
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def create_relation(
@@ -543,30 +572,45 @@ def create_relation(
     if valid_to:
         qualifiers["valid_to"] = valid_to
     rel = Relation(
-        from_entity=from_entity, to_entity=to_entity,
-        relation_type=relation_type, confidence=confidence,
-        verified=not verify, project=proj,
-        session_id=sid, origin_tool="create_relation",
-        created_at=datetime.now(timezone.utc).isoformat(),
+        from_entity=from_entity,
+        to_entity=to_entity,
+        relation_type=relation_type,
+        confidence=confidence,
+        verified=not verify,
+        project=proj,
+        session_id=sid,
+        origin_tool="create_relation",
+        created_at=datetime.now(UTC).isoformat(),
         qualifiers=qualifiers,
     )
     if verify:
         vr = _svc_verif().verify(rel)
         if not vr.accepted:
-            log_event(project=proj, tool_name="create_relation", session_id=sid,
-                      was_hallucination_blocked=1,
-                      latency_ms=int((time.time() - start) * 1000))
-            return {"created": False, "reason": "failed verification",
-                    "verification": {"accepted": vr.accepted, "score": vr.score}}
+            log_event(
+                project=proj,
+                tool_name="create_relation",
+                session_id=sid,
+                was_hallucination_blocked=1,
+                latency_ms=int((time.time() - start) * 1000),
+            )
+            return {
+                "created": False,
+                "reason": "failed verification",
+                "verification": {"accepted": vr.accepted, "score": vr.score},
+            }
         rel.verified = True
         rel.confidence = vr.score
         _level = getattr(vr, "level", "") or ""
         rel.qualifiers["verifier"] = "vog" if _level.startswith("vog") else "srmkg"
 
     get_store().add_relation(rel)
-    log_event(project=proj, tool_name="create_relation", session_id=sid,
-              vog_score=rel.confidence,
-              latency_ms=int((time.time() - start) * 1000))
+    log_event(
+        project=proj,
+        tool_name="create_relation",
+        session_id=sid,
+        vog_score=rel.confidence,
+        latency_ms=int((time.time() - start) * 1000),
+    )
     return {"created": True, "relation": rel.__dict__}
 
 
@@ -574,10 +618,10 @@ def create_relation(
 # Tool 10: delete_relation
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
 def delete_relation(
-    from_entity: str, to_entity: str, relation_type: str,
-    project: str = "", session_id: str = ""
+    from_entity: str, to_entity: str, relation_type: str, project: str = "", session_id: str = ""
 ) -> dict:
     """Delete a relation edge from the knowledge graph."""
     _project(project)  # honour HYDRAMEM_PROJECT env even if unused below
@@ -589,9 +633,13 @@ def delete_relation(
 # Tool 11: get_entity_neighbors
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
 def get_entity_neighbors_tool(
-    entity_id: str, hops: int = 1, project: str = "", session_id: str = "",
+    entity_id: str,
+    hops: int = 1,
+    project: str = "",
+    session_id: str = "",
     as_of: str = "",
 ) -> dict:
     """Return all neighbours of an entity up to N hops away.
@@ -607,7 +655,9 @@ def get_entity_neighbors_tool(
     else:
         neighbours = get_store().get_entity_neighbors(entity_id, hops=hops)
     return {
-        "entity_id": entity_id, "hops": hops, "as_of": as_of,
+        "entity_id": entity_id,
+        "hops": hops,
+        "as_of": as_of,
         "neighbours": neighbours,
     }
 
@@ -616,10 +666,14 @@ def get_entity_neighbors_tool(
 # Tool 17: query_entity_relations (temporal knowledge-graph query)
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
 def query_entity_relations(
-    entity_id: str, project: str = "", as_of: str = "",
-    direction: str = "both", session_id: str = "",
+    entity_id: str,
+    project: str = "",
+    as_of: str = "",
+    direction: str = "both",
+    session_id: str = "",
 ) -> dict:
     """Temporal knowledge-graph query: an entity's relationship facts.
 
@@ -632,14 +686,18 @@ def query_entity_relations(
         entity_id, project=proj, as_of=as_of, direction=direction
     )
     return {
-        "entity": entity_id, "as_of": as_of, "direction": direction,
-        "facts": facts, "count": len(facts),
+        "entity": entity_id,
+        "as_of": as_of,
+        "direction": direction,
+        "facts": facts,
+        "count": len(facts),
     }
 
 
 # ---------------------------------------------------------------------------
 # Tool 12: run_night_gardener
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def run_night_gardener(project: str = "", session_id: str = "") -> dict:
@@ -649,7 +707,9 @@ def run_night_gardener(project: str = "", session_id: str = "") -> dict:
     result = _svc_gardener().run(project=proj)
     _svc_search().invalidate_cache(proj)
     log_event(
-        project=proj, tool_name="run_night_gardener", session_id=sid,
+        project=proj,
+        tool_name="run_night_gardener",
+        session_id=sid,
         latency_ms=int((time.time() - start) * 1000),
         metadata={
             "relations_accepted": result.get("relations_accepted"),
@@ -663,6 +723,7 @@ def run_night_gardener(project: str = "", session_id: str = "") -> dict:
 # Tool 13: get_garden_status
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
 def get_garden_status_tool(session_id: str = "") -> dict:
     """Return the current Night Gardener status and cumulative stats."""
@@ -673,10 +734,9 @@ def get_garden_status_tool(session_id: str = "") -> dict:
 # Tool 14: train_gnn
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
-def train_gnn_tool(
-    project: str = "", dry_run: bool = True, session_id: str = ""
-) -> dict:
+def train_gnn_tool(project: str = "", dry_run: bool = True, session_id: str = "") -> dict:
     """Train LightGNN and optionally apply spurious-edge pruning."""
     start = time.time()
     proj, sid = _project(project), _session(session_id)
@@ -691,7 +751,9 @@ def train_gnn_tool(
     if not dry_run and result.suggested_count > 0:
         out["pruning"] = pruner.apply(result, project=proj, dry_run=False)
     log_event(
-        project=proj, tool_name="train_gnn", session_id=sid,
+        project=proj,
+        tool_name="train_gnn",
+        session_id=sid,
         latency_ms=int((time.time() - start) * 1000),
         metadata={"suggested": result.suggested_count, "dry_run": dry_run},
     )
@@ -702,13 +764,14 @@ def train_gnn_tool(
 # Tool 15: check_conflict
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
 def check_conflict_tool(
-    entity_a: str, entity_b: str, text_a: str, text_b: str,
-    project: str = "", session_id: str = ""
+    entity_a: str, entity_b: str, text_a: str, text_b: str, project: str = "", session_id: str = ""
 ) -> dict:
     """Detect contradictions between two text passages about two entities."""
     from hydramem.llm.factory import create_provider
+
     start = time.time()
     proj, sid = _project(project), _session(session_id)
     checker = ConflictChecker(create_provider(config))
@@ -726,7 +789,9 @@ def check_conflict_tool(
         ),
     )
     log_event(
-        project=proj, tool_name="check_conflict", session_id=sid,
+        project=proj,
+        tool_name="check_conflict",
+        session_id=sid,
         llm_preset=config.llm_preset,
         was_hallucination_blocked=1 if result["conflict"] else 0,
         vog_score=result["confidence"],
@@ -739,20 +804,24 @@ def check_conflict_tool(
 # Tool 16: get_full_document
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
-def get_full_document_tool(
-    doc_id: str, project: str = "", session_id: str = ""
-) -> dict:
+def get_full_document_tool(doc_id: str, project: str = "", session_id: str = "") -> dict:
     """Retrieve the full text of a document by its doc_id."""
     _project(project)
     text = get_store().get_full_document(doc_id)
-    return {"doc_id": doc_id, "text": text, "tokens": count_tokens(text) if text else 0,
-            "found": bool(text)}
+    return {
+        "doc_id": doc_id,
+        "text": text,
+        "tokens": count_tokens(text) if text else 0,
+        "found": bool(text),
+    }
 
 
 # ---------------------------------------------------------------------------
 # Tool 17: hydramem_stats — agent self-report of token savings
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def hydramem_stats_tool(days: int = 7, session_id: str = "") -> dict:
@@ -775,6 +844,7 @@ def hydramem_stats_tool(days: int = 7, session_id: str = "") -> dict:
 # Tool 18: graph_only_search — native Cypher / graph-only retrieval
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
 def graph_only_search_tool(
     query: str,
@@ -793,7 +863,9 @@ def graph_only_search_tool(
     proj, sid = _project(project), _session(session_id)
     result = _svc_search().graph_only_search(query, project=proj, max_hops=hops, top_k=k)
     log_event(
-        project=proj, tool_name="graph_only_search", session_id=sid,
+        project=proj,
+        tool_name="graph_only_search",
+        session_id=sid,
         chunks_total=len(result.get("chunks", [])),
         latency_ms=int((time.time() - start) * 1000),
     )
@@ -804,8 +876,10 @@ def graph_only_search_tool(
 # Entry point
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     from hydramem.core.logging import get_logger
+
     log = get_logger("hydramem")
 
     transport = os.getenv("HYDRAMEM_TRANSPORT", "streamable-http").lower()
@@ -818,7 +892,10 @@ def main() -> None:
 
     log.info(
         "HydraMem MCP server starting on %s:%s (session=%s, transport=%s)",
-        config.mcp_host, config.mcp_port, _SESSION_ID, transport,
+        config.mcp_host,
+        config.mcp_port,
+        _SESSION_ID,
+        transport,
     )
     mcp.run(transport=transport, host=config.mcp_host, port=config.mcp_port)
 

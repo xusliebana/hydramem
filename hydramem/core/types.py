@@ -2,6 +2,7 @@
 
 All types are pure dataclasses — no logic, no imports from other tools modules.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -89,9 +90,7 @@ CANONICAL_QUALIFIERS: frozenset[str] = frozenset(
 )
 
 
-def merge_qualifiers(
-    base: dict[str, str], incoming: dict[str, str]
-) -> dict[str, str]:
+def merge_qualifiers(base: dict[str, str], incoming: dict[str, str]) -> dict[str, str]:
     """Collision-safe union of two qualifier maps.
 
     Used when the same ``(from, relation_type, to)`` edge is re-observed so

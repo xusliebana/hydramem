@@ -6,6 +6,7 @@ See ``docs/benchmarks.md`` for the contract we want this script to fulfil.
 
 Run with ``uv run python scripts/benchmark.py --help``.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -94,9 +95,7 @@ def _download(url: str, dest: Path) -> Path:
 
 def _validate_normalized(data: dict) -> None:
     if not isinstance(data, dict) or "corpus" not in data or "items" not in data:
-        raise BenchmarkDataError(
-            "Normalized dataset must be an object with 'corpus' and 'items'."
-        )
+        raise BenchmarkDataError("Normalized dataset must be an object with 'corpus' and 'items'.")
 
 
 def _normalize_hotpotqa(raw: list[dict]) -> dict:
@@ -150,12 +149,8 @@ def _unavailable_loader(name: str, url: str):
 
 _DATASET_LOADERS = {
     "hotpotqa": _load_hotpotqa,
-    "musique": _unavailable_loader(
-        "MuSiQue", "https://github.com/StonyBrookNLP/musique"
-    ),
-    "longmemeval": _unavailable_loader(
-        "LongMemEval", "https://github.com/xiaowu0162/LongMemEval"
-    ),
+    "musique": _unavailable_loader("MuSiQue", "https://github.com/StonyBrookNLP/musique"),
+    "longmemeval": _unavailable_loader("LongMemEval", "https://github.com/xiaowu0162/LongMemEval"),
 }
 
 
@@ -259,9 +254,7 @@ def _evaluate(name, retrieve, items, k, judge_provider) -> ConditionResult:
     return cr
 
 
-def _run_condition(
-    name, dataset, cfg, *, project, k, cycles, judge_provider
-) -> ConditionResult:
+def _run_condition(name, dataset, cfg, *, project, k, cycles, judge_provider) -> ConditionResult:
     """Ingest the corpus into a fresh ephemeral store and evaluate one condition."""
     from hydramem.ingest.pipeline import IngestionPipeline
     from hydramem.search import SearchService
@@ -269,9 +262,7 @@ def _run_condition(
     from hydramem.storage.graph.networkx_repo import NetworkXGraphRepository
     from hydramem.storage.vector.memory_repo import InMemoryVectorRepository
 
-    store = KnowledgeStore(
-        graph=NetworkXGraphRepository(), vector=InMemoryVectorRepository()
-    )
+    store = KnowledgeStore(graph=NetworkXGraphRepository(), vector=InMemoryVectorRepository())
     pipeline = IngestionPipeline(store=store, config=cfg)
     for doc_id, text in dataset["corpus"].items():
         pipeline.ingest_text(text, source=doc_id, project=project)
@@ -280,6 +271,7 @@ def _run_condition(
     notes: list[str] = []
 
     if name == "naive_topk":
+
         def retrieve(q: str):
             return store.vector_search(svc._embedder.embed(q, is_query=True), k=k, project=project)
     elif name in ("hydra_search_no_garden", "hydra_search_garden"):
@@ -327,8 +319,7 @@ def run_dataset(
         dataset=name,
         git_commit=_git_commit(),
         llm_model=(
-            f"{getattr(cfg, 'embedding_backend', 'auto')}:"
-            f"{getattr(cfg, 'embedding_model', '?')}"
+            f"{getattr(cfg, 'embedding_backend', 'auto')}:{getattr(cfg, 'embedding_model', '?')}"
         ),
         judge_model="enabled" if judge_provider is not None else "none",
         timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -336,7 +327,12 @@ def run_dataset(
     for cond in conditions:
         report.conditions.append(
             _run_condition(
-                cond, dataset, cfg, project=project, k=k, cycles=cycles,
+                cond,
+                dataset,
+                cfg,
+                project=project,
+                k=k,
+                cycles=cycles,
                 judge_provider=judge_provider,
             )
         )
@@ -355,9 +351,7 @@ def _narrative(data: dict) -> str:
     if naive and nogarden:
         d = nogarden["recall_at_5"] - naive["recall_at_5"]
         verb = "improves" if d > 0 else ("matches" if d == 0 else "reduces")
-        parts.append(
-            f"Hybrid + verification {verb} Recall@5 by {d:+.3f} vs naive top-k."
-        )
+        parts.append(f"Hybrid + verification {verb} Recall@5 by {d:+.3f} vs naive top-k.")
     if nogarden and garden:
         d = garden["recall_at_5"] - nogarden["recall_at_5"]
         verb = "lifts" if d > 0 else ("does not move" if d == 0 else "lowers")
@@ -449,9 +443,7 @@ def _git_commit() -> str:
     try:
         import subprocess
 
-        return subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"], text=True
-        ).strip()
+        return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], text=True).strip()
     except Exception:
         return "unknown"
 
@@ -469,8 +461,12 @@ class _PassthroughPipeline:
 
     def verify_chunks(self, chunks: list, query: str = "") -> dict:
         return {
-            "filtered": list(chunks), "verified": [], "rejected_vector": [],
-            "rejected_srmkg": [], "rejected_vog": [], "vog_scores": [],
+            "filtered": list(chunks),
+            "verified": [],
+            "rejected_vector": [],
+            "rejected_srmkg": [],
+            "rejected_vog": [],
+            "vog_scores": [],
         }
 
 
@@ -535,9 +531,7 @@ def _judge_answerable(query: str, context: str, provider) -> str:
     if not (context or "").strip():
         return "NO"
     try:
-        answer = provider.complete(
-            _JUDGE_PROMPT.format(query=query, context=context[:2000])
-        )
+        answer = provider.complete(_JUDGE_PROMPT.format(query=query, context=context[:2000]))
     except Exception:
         answer = ""
     if not answer:
@@ -571,9 +565,7 @@ def run_local(data_dir: Path, k: int = 5, judge_provider=None) -> dict:
     corpus_dir = data_dir / "corpus"
 
     cfg = load_config()
-    store = KnowledgeStore(
-        graph=NetworkXGraphRepository(), vector=InMemoryVectorRepository()
-    )
+    store = KnowledgeStore(graph=NetworkXGraphRepository(), vector=InMemoryVectorRepository())
     pipeline = IngestionPipeline(store=store, config=cfg)
     project = "bench_local"
     for md in sorted(corpus_dir.glob("*.md")):
@@ -586,9 +578,7 @@ def run_local(data_dir: Path, k: int = 5, judge_provider=None) -> dict:
 
     def _hybrid(query: str, *, bm25: bool) -> list:
         svc._bm25_enabled = bm25
-        return svc.hydra_search(
-            query, project=project, top_k=k, traversal="bfs"
-        )["chunks"]
+        return svc.hydra_search(query, project=project, top_k=k, traversal="bfs")["chunks"]
 
     conditions = {
         "vector_only": _vector_only,
@@ -634,9 +624,7 @@ def run_local(data_dir: Path, k: int = 5, judge_provider=None) -> dict:
 
 
 def cmd_local(args: argparse.Namespace) -> int:
-    data_dir = (
-        Path(args.data) if args.data else (Path(__file__).parent / "bench_data")
-    )
+    data_dir = Path(args.data) if args.data else (Path(__file__).parent / "bench_data")
     judge_provider = None
     if args.judge:
         from hydramem.llm.factory import create_provider
@@ -686,8 +674,12 @@ def main(argv: list[str] | None = None) -> int:
     p_ing = sub.add_parser("ingest", help="Download + normalize a dataset into the bench cache")
     p_ing.add_argument("--dataset", choices=["musique", "longmemeval", "hotpotqa"], required=True)
     p_ing.add_argument("--project", default="bench")
-    p_ing.add_argument("--from-file", dest="from_file", default=None,
-                       help="Use a pre-built normalized dataset JSON (offline / reproducible)")
+    p_ing.add_argument(
+        "--from-file",
+        dest="from_file",
+        default=None,
+        help="Use a pre-built normalized dataset JSON (offline / reproducible)",
+    )
     p_ing.add_argument("--limit", type=int, default=None, help="Cap the number of questions")
     p_ing.add_argument("--refresh", action="store_true", help="Ignore the cache and re-download")
     p_ing.set_defaults(func=cmd_ingest)
@@ -701,12 +693,23 @@ def main(argv: list[str] | None = None) -> int:
         default=["naive_topk", "hydra_search_no_garden", "hydra_search_garden"],
     )
     p_run.add_argument("-k", type=int, default=5, help="Top-k cutoff (default: 5)")
-    p_run.add_argument("--cycles", type=int, default=3,
-                       help="Night Gardener cycles for the garden condition (default: 3)")
-    p_run.add_argument("--judge", action="store_true",
-                       help="Add an LLM-judged faithfulness metric (honest 'no LLM' fallback)")
-    p_run.add_argument("--from-file", dest="from_file", default=None,
-                       help="Use a pre-built normalized dataset JSON (offline / reproducible)")
+    p_run.add_argument(
+        "--cycles",
+        type=int,
+        default=3,
+        help="Night Gardener cycles for the garden condition (default: 3)",
+    )
+    p_run.add_argument(
+        "--judge",
+        action="store_true",
+        help="Add an LLM-judged faithfulness metric (honest 'no LLM' fallback)",
+    )
+    p_run.add_argument(
+        "--from-file",
+        dest="from_file",
+        default=None,
+        help="Use a pre-built normalized dataset JSON (offline / reproducible)",
+    )
     p_run.add_argument("--limit", type=int, default=None, help="Cap the number of questions")
     p_run.add_argument("--refresh", action="store_true", help="Ignore the cache and re-download")
     p_run.add_argument("--output", default="reports/run.json")
@@ -721,7 +724,8 @@ def main(argv: list[str] | None = None) -> int:
         help="Self-contained offline retrieval benchmark (no downloads, no judge)",
     )
     p_local.add_argument(
-        "--data", default=None,
+        "--data",
+        default=None,
         help="Override fixture dir (default: scripts/bench_data)",
     )
     p_local.add_argument("-k", type=int, default=5, help="Top-k cutoff (default: 5)")
@@ -731,9 +735,7 @@ def main(argv: list[str] | None = None) -> int:
         help="Add an LLM-judged answerability metric (uses the configured LLM; "
         "honestly reports 'no LLM' when unavailable)",
     )
-    p_local.add_argument(
-        "--json", default=None, help="Also write the raw report JSON to this path"
-    )
+    p_local.add_argument("--json", default=None, help="Also write the raw report JSON to this path")
     p_local.set_defaults(func=cmd_local)
 
     args = parser.parse_args(argv)

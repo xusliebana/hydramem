@@ -1,4 +1,5 @@
 """LanceDB vector repository — embedded, serverless, persistent."""
+
 from __future__ import annotations
 
 from typing import Any

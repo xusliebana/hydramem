@@ -13,6 +13,7 @@ Cleanlab / Confident Learning).
 Everything stays on disk under the HydraMem home directory — no data leaves the
 machine. Paths are injectable so tests never touch real state.
 """
+
 from __future__ import annotations
 
 import json
@@ -29,12 +30,12 @@ logger = get_logger(__name__)
 #: training, and scoring time so the learned weights stay interpretable and
 #: consistent (see ``hydramem/gnn_prune.py::edge_feature_vector``).
 PRUNE_FEATURES: tuple[str, ...] = (
-    "heuristic",   # heuristic spuriousness score (0..1)
-    "jaccard",     # |common| / |union| of neighbours
-    "common",      # common neighbours / max(deg_u, deg_v)
-    "deg_u",       # source degree, normalised by the graph max
-    "deg_v",       # target degree, normalised by the graph max
-    "hub",         # 1.0 if either endpoint is a hub (deg > 20)
+    "heuristic",  # heuristic spuriousness score (0..1)
+    "jaccard",  # |common| / |union| of neighbours
+    "common",  # common neighbours / max(deg_u, deg_v)
+    "deg_u",  # source degree, normalised by the graph max
+    "deg_v",  # target degree, normalised by the graph max
+    "hub",  # 1.0 if either endpoint is a hub (deg > 20)
 )
 
 _VALID_LABELS = ("prune", "keep")
@@ -132,9 +133,16 @@ class PruneReviewStore:
                         rel_type, spuriousness, features_json, source, status
                     ) VALUES (?,?,?,?,?,?,?,?,?,?, 'pending')""",
                     (
-                        datetime.now(UTC).isoformat(), project, from_id, to_id,
-                        from_name, to_name, rel_type, float(spuriousness),
-                        json.dumps(features or {}), source,
+                        datetime.now(UTC).isoformat(),
+                        project,
+                        from_id,
+                        to_id,
+                        from_name,
+                        to_name,
+                        rel_type,
+                        float(spuriousness),
+                        json.dumps(features or {}),
+                        source,
                     ),
                 )
                 conn.commit()
@@ -173,9 +181,7 @@ class PruneReviewStore:
 
     def labeled(self, project: str = "default") -> list[dict]:
         """Return all labelled rows for *project* (the golden dataset)."""
-        return self._select(
-            "WHERE project = ? AND status = 'labeled' ORDER BY id ASC", (project,)
-        )
+        return self._select("WHERE project = ? AND status = 'labeled' ORDER BY id ASC", (project,))
 
     def stats(self, project: str = "default") -> dict:
         """Counts for `garden-status` / the review CLI."""
@@ -200,19 +206,25 @@ class PruneReviewStore:
         out.parent.mkdir(parents=True, exist_ok=True)
         with out.open("w", encoding="utf-8") as fh:
             for r in rows:
-                fh.write(json.dumps({
-                    "from_id": r["from_id"], "to_id": r["to_id"],
-                    "from_name": r["from_name"], "to_name": r["to_name"],
-                    "features": r["features"], "label": r["label"],
-                }) + "\n")
+                fh.write(
+                    json.dumps(
+                        {
+                            "from_id": r["from_id"],
+                            "to_id": r["to_id"],
+                            "from_name": r["from_name"],
+                            "to_name": r["to_name"],
+                            "features": r["features"],
+                            "label": r["label"],
+                        }
+                    )
+                    + "\n"
+                )
         return len(rows)
 
     def _select(self, where_sql: str, params: tuple) -> list[dict]:
         with sqlite3.connect(self._path) as conn:
             conn.row_factory = sqlite3.Row
-            rows = conn.execute(
-                f"SELECT * FROM prune_reviews {where_sql}", params
-            ).fetchall()
+            rows = conn.execute(f"SELECT * FROM prune_reviews {where_sql}", params).fetchall()
         out: list[dict] = []
         for r in rows:
             d = dict(r)

@@ -3,6 +3,7 @@
 OCP: new stages can be inserted by modifying only this class.
 DIP: depends on LLMProvider and Config abstractions, not concrete classes.
 """
+
 from __future__ import annotations
 
 from hydramem.core.config import Config, load_config
@@ -68,9 +69,7 @@ class VerificationPipeline:
         # Borderline: forward to VoG if cap not reached
         if self._vog_calls >= self._max_vog:
             # Cap reached — default accept with SR-MKG score
-            capped = VerificationResult(
-                accepted=True, score=result.score, level="srmkg_cap"
-            )
+            capped = VerificationResult(accepted=True, score=result.score, level="srmkg_cap")
             capped.breakdown = getattr(result, "breakdown", None)  # type: ignore[attr-defined]
             self._log_srmkg_decision(relation, capped, source="srmkg_cap")
             return capped
@@ -79,9 +78,7 @@ class VerificationPipeline:
         vog_result = self._vog.verify(relation)
         # Carry the SR-MKG breakdown so callers / telemetry can train on it.
         vog_result.breakdown = getattr(result, "breakdown", None)  # type: ignore[attr-defined]
-        self._log_srmkg_decision(
-            relation, vog_result, source="vog", parent=result
-        )
+        self._log_srmkg_decision(relation, vog_result, source="vog", parent=result)
         return vog_result
 
     def _log_srmkg_decision(
@@ -95,9 +92,7 @@ class VerificationPipeline:
         """Record (components → final_label) for later calibration."""
         if not getattr(self._cfg, "srmkg_log_decisions", True):
             return
-        breakdown = getattr(result, "breakdown", None) or getattr(
-            parent, "breakdown", None
-        )
+        breakdown = getattr(result, "breakdown", None) or getattr(parent, "breakdown", None)
         if breakdown is None:
             return
         try:

@@ -1,4 +1,5 @@
 """Ingestion pipeline — chunking, embedding, extraction, orchestration."""
+
 from hydramem.ingest.chunker import MarkdownChunker
 from hydramem.ingest.embedder import EmbeddingService
 from hydramem.ingest.extractor import EntityExtractor

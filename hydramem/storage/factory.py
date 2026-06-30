@@ -12,6 +12,7 @@ available behind environment switches:
   * ``HYDRAMEM_VECTOR_BACKEND`` — ``grafeo`` (default) | ``lancedb`` |
                                   ``memory``
 """
+
 from __future__ import annotations
 
 import os as _os
@@ -41,8 +42,10 @@ def _open_grafeo(db_path: str) -> Any:
     cached = _grafeo_handles.get(db_path)
     if cached is not None:
         return cached
-    from grafeo import GrafeoDB  # type: ignore
     from pathlib import Path
+
+    from grafeo import GrafeoDB  # type: ignore
+
     Path(db_path).parent.mkdir(parents=True, exist_ok=True)
     db = GrafeoDB(db_path)
     _grafeo_handles[db_path] = db
@@ -52,6 +55,7 @@ def _open_grafeo(db_path: str) -> Any:
 # ---------------------------------------------------------------------------
 # Backend selection helpers
 # ---------------------------------------------------------------------------
+
 
 def _grafeo_db_path(config: Config) -> str:
     """Resolve the Grafeo DB directory (alias of legacy ``ladybug_db_path``)."""
@@ -66,7 +70,9 @@ def _create_graph_repo(config: Config) -> GraphRepository:
     if backend == "kuzu":
         try:
             import kuzu as _mod  # type: ignore
+
             from hydramem.storage.graph.ladybug_repo import LadybugGraphRepository
+
             logger.info("Graph backend: Kuzu (opt-in)")
             return LadybugGraphRepository(config.ladybug_db_path, _mod)
         except ImportError:
@@ -75,7 +81,9 @@ def _create_graph_repo(config: Config) -> GraphRepository:
     if backend == "ladybug":
         try:
             import ladybug as _mod  # type: ignore
+
             from hydramem.storage.graph.ladybug_repo import LadybugGraphRepository
+
             logger.info("Graph backend: LadybugDB (opt-in)")
             return LadybugGraphRepository(config.ladybug_db_path, _mod)
         except ImportError:
@@ -83,6 +91,7 @@ def _create_graph_repo(config: Config) -> GraphRepository:
 
     if backend == "networkx":
         from hydramem.storage.graph.networkx_repo import NetworkXGraphRepository
+
         logger.info("Graph backend: NetworkX (forced) @ %s", db_path)
         return NetworkXGraphRepository(db_path)
 
@@ -91,17 +100,17 @@ def _create_graph_repo(config: Config) -> GraphRepository:
         try:
             db = _open_grafeo(db_path)
             from hydramem.storage.graph.grafeo_repo import GrafeoGraphRepository
+
             logger.info("Graph backend: Grafeo @ %s", db_path)
             return GrafeoGraphRepository(db=db)
         except ImportError:
             if backend == "grafeo":
                 logger.warning("Grafeo requested but not installed — falling back")
             else:
-                logger.info(
-                    "Grafeo not available (needs Python ≥ 3.12) — using NetworkX"
-                )
+                logger.info("Grafeo not available (needs Python ≥ 3.12) — using NetworkX")
 
     from hydramem.storage.graph.networkx_repo import NetworkXGraphRepository
+
     logger.info("Graph backend: NetworkX (persistent pickle at %s)", db_path)
     return NetworkXGraphRepository(db_path)
 
@@ -113,6 +122,7 @@ def _create_vector_repo(config: Config) -> VectorRepository:
     if backend == "lancedb":
         try:
             from hydramem.storage.vector.lancedb_repo import LanceDBVectorRepository
+
             logger.info("Vector backend: LanceDB (opt-in) @ %s", config.lancedb_path)
             return LanceDBVectorRepository(config.lancedb_path, config.embedding_dim)
         except ImportError:
@@ -120,6 +130,7 @@ def _create_vector_repo(config: Config) -> VectorRepository:
 
     if backend == "memory":
         from hydramem.storage.vector.memory_repo import InMemoryVectorRepository
+
         logger.info("Vector backend: in-memory (forced)")
         return InMemoryVectorRepository()
 
@@ -128,6 +139,7 @@ def _create_vector_repo(config: Config) -> VectorRepository:
         try:
             db = _open_grafeo(_grafeo_db_path(config))
             from hydramem.storage.vector.grafeo_repo import GrafeoVectorRepository
+
             logger.info(
                 "Vector backend: Grafeo HNSW (shared DB) dim=%d",
                 config.embedding_dim,
@@ -140,11 +152,13 @@ def _create_vector_repo(config: Config) -> VectorRepository:
     # Fallback chain: LanceDB → in-memory.
     try:
         from hydramem.storage.vector.lancedb_repo import LanceDBVectorRepository
+
         logger.info("Vector backend: LanceDB (auto fallback) @ %s", config.lancedb_path)
         return LanceDBVectorRepository(config.lancedb_path, config.embedding_dim)
     except ImportError:
         pass
     from hydramem.storage.vector.memory_repo import InMemoryVectorRepository
+
     logger.info("Vector backend: in-memory (install grafeo or lancedb for persistence)")
     return InMemoryVectorRepository()
 
@@ -152,6 +166,7 @@ def _create_vector_repo(config: Config) -> VectorRepository:
 # ---------------------------------------------------------------------------
 # KnowledgeStore — unified facade (ISP: exposes only needed methods)
 # ---------------------------------------------------------------------------
+
 
 class KnowledgeStore:
     """Thin facade over GraphRepository + VectorRepository.
@@ -186,9 +201,7 @@ class KnowledgeStore:
     def add_relation(self, relation: Relation) -> None:
         self._graph.add_relation(relation)
 
-    def delete_relation(
-        self, from_entity: str, to_entity: str, relation_type: str
-    ) -> bool:
+    def delete_relation(self, from_entity: str, to_entity: str, relation_type: str) -> bool:
         return self._graph.delete_relation(from_entity, to_entity, relation_type)
 
     def delete_entity(self, entity_id: str) -> bool:
@@ -217,8 +230,10 @@ class KnowledgeStore:
             return 0
         return int(
             fn(
-                entity_id, delta,
-                min_confidence=min_confidence, max_confidence=max_confidence,
+                entity_id,
+                delta,
+                min_confidence=min_confidence,
+                max_confidence=max_confidence,
             )
         )
 
@@ -273,6 +288,7 @@ class KnowledgeStore:
 # ---------------------------------------------------------------------------
 # Factory function + module-level singleton
 # ---------------------------------------------------------------------------
+
 
 def create_store(config: Config | None = None) -> KnowledgeStore:
     """Build a KnowledgeStore with auto-selected backends."""

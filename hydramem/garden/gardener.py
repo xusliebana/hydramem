@@ -3,6 +3,7 @@
 Single responsibility: coordinate Phase 1 (Inferrer), Phase 2 (VerificationPipeline),
 and Phase 3 (Pruner).  Does not implement any phase logic itself (SRP + DIP).
 """
+
 from __future__ import annotations
 
 import math
@@ -127,9 +128,7 @@ class NightGardener:
                 # the edge so the graph stays auditable and SR-MKG can later
                 # weigh fresh-vs-stale verifier verdicts.
                 _level = getattr(result, "level", "") or ""
-                rel.qualifiers["verifier"] = (
-                    "vog" if _level.startswith("vog") else "srmkg"
-                )
+                rel.qualifiers["verifier"] = "vog" if _level.startswith("vog") else "srmkg"
                 self._store.add_relation(rel)
                 accepted.append(rel)
             else:
@@ -142,9 +141,7 @@ class NightGardener:
         consolidation = self._consolidate(project)
 
         # Phase 3 — Prune (reuse-protected entities are never removed)
-        pruning = self._pruner.prune(
-            project=project, protected_ids=consolidation["protected_ids"]
-        )
+        pruning = self._pruner.prune(project=project, protected_ids=consolidation["protected_ids"])
 
         # Phase 3.5 — Capture borderline prune candidates for human review
         review = self._capture_prune_reviews(project)
@@ -160,9 +157,7 @@ class NightGardener:
                 "relations_proposed": status.get("relations_proposed", 0) + len(candidates),
                 "relations_accepted": status.get("relations_accepted", 0) + len(accepted),
                 "relations_rejected": status.get("relations_rejected", 0) + rejected,
-                "relations_invalidated": (
-                    status.get("relations_invalidated", 0) + invalidated
-                ),
+                "relations_invalidated": (status.get("relations_invalidated", 0) + invalidated),
                 "session_entries_filtered_repeat_threshold": (
                     status.get("session_entries_filtered_repeat_threshold", 0)
                     + session_metrics["entries_filtered_repeat_threshold"]
@@ -178,19 +173,18 @@ class NightGardener:
                 "prune_protected": (
                     status.get("prune_protected", 0) + pruning.get("prune_protected", 0)
                 ),
-                "prune_reviews_queued": (
-                    status.get("prune_reviews_queued", 0) + review["queued"]
-                ),
-                "pruner_retrained": (
-                    status.get("pruner_retrained", 0) + (1 if retrained else 0)
-                ),
+                "prune_reviews_queued": (status.get("prune_reviews_queued", 0) + review["queued"]),
+                "pruner_retrained": (status.get("pruner_retrained", 0) + (1 if retrained else 0)),
             }
         )
         self._status_repo.save(status)
 
         logger.info(
             "Night Gardener done: proposed=%d accepted=%d rejected=%d pruned=%d",
-            len(candidates), len(accepted), rejected, pruning["pruned_entities"],
+            len(candidates),
+            len(accepted),
+            rejected,
+            pruning["pruned_entities"],
         )
 
         return {
@@ -203,7 +197,9 @@ class NightGardener:
             "sessions_used": session_metrics["sessions_used"],
             "session_entries_considered": session_metrics["entries_considered"],
             "session_entries_used": session_metrics["entries_used"],
-            "session_entries_filtered_repeat_threshold": session_metrics["entries_filtered_repeat_threshold"],
+            "session_entries_filtered_repeat_threshold": session_metrics[
+                "entries_filtered_repeat_threshold"
+            ],
             "nodes_pruned": pruning["pruned_entities"],
             "edges_pruned": pruning["pruned_edges"],
             "entities_boosted": consolidation["entities_boosted"],
@@ -240,9 +236,7 @@ class NightGardener:
             if rel.relation_type.lower() not in ftypes:
                 continue
             valid_to = rel.qualifiers.get("valid_from") or now
-            total += supersede(
-                rel.from_entity, rel.relation_type, rel.to_entity, valid_to
-            )
+            total += supersede(rel.from_entity, rel.relation_type, rel.to_entity, valid_to)
         if total:
             logger.info("temporal invalidation: closed %d superseded edge(s)", total)
         return total
@@ -291,16 +285,16 @@ class NightGardener:
                 # meaningful even if low-degree — exempt it from pruning.
                 result["protected_ids"].add(eid)
                 try:
-                    degree = max(
-                        1, len(self._store.get_entity_neighbors(eid, hops=1))
-                    )
+                    degree = max(1, len(self._store.get_entity_neighbors(eid, hops=1)))
                 except Exception:  # noqa: BLE001
                     degree = 1
                 boost = math.tanh(sessions / 5.0) * boost_unit / math.sqrt(degree)
                 if adjust is not None and boost > 0:
                     changed = adjust(
-                        eid, boost,
-                        min_confidence=min_conf, max_confidence=max_conf,
+                        eid,
+                        boost,
+                        min_confidence=min_conf,
+                        max_confidence=max_conf,
                     )
                     if changed:
                         result["entities_boosted"] += 1
@@ -311,8 +305,10 @@ class NightGardener:
                 decay = decay_step * (1.0 - math.exp(-overdue / max(decay_after, 1.0)))
                 if adjust is not None and decay > 0:
                     changed = adjust(
-                        eid, -decay,
-                        min_confidence=min_conf, max_confidence=max_conf,
+                        eid,
+                        -decay,
+                        min_confidence=min_conf,
+                        max_confidence=max_conf,
                     )
                     if changed:
                         result["entities_decayed"] += 1
@@ -358,9 +354,12 @@ class NightGardener:
                 continue
             if store.add_candidate(
                 project=project,
-                from_id=r["from_id"], to_id=r["to_id"],
-                from_name=r["from_name"], to_name=r["to_name"],
-                spuriousness=r["spuriousness"], features=r["features"],
+                from_id=r["from_id"],
+                to_id=r["to_id"],
+                from_name=r["from_name"],
+                to_name=r["to_name"],
+                spuriousness=r["spuriousness"],
+                features=r["features"],
                 source="gnn",
             ):
                 queued += 1
@@ -386,9 +385,7 @@ class NightGardener:
             if labelled < MIN_SAMPLES:
                 return False
             train_pruner(project, store=store, save=True)
-            logger.info(
-                "prune-review: auto-trained learned pruner from %d labels", labelled
-            )
+            logger.info("prune-review: auto-trained learned pruner from %d labels", labelled)
             return True
         except Exception as exc:  # noqa: BLE001
             logger.warning("prune-review auto-train skipped: %s", exc)

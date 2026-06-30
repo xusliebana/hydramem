@@ -1,4 +1,5 @@
 """MarkdownChunker — single responsibility: split Markdown text into chunks."""
+
 from __future__ import annotations
 
 import re

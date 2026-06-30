@@ -1,4 +1,5 @@
 """Tests for Personalized PageRank retrieval and RRF fusion."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -10,7 +11,10 @@ def _store_for_chain():
     """Linear chain a -> b -> c -> d (undirected for PPR)."""
     store = MagicMock()
     store.list_entities.return_value = [
-        {"id": "a"}, {"id": "b"}, {"id": "c"}, {"id": "d"},
+        {"id": "a"},
+        {"id": "b"},
+        {"id": "c"},
+        {"id": "d"},
     ]
     neighbors = {
         "a": [{"id": "b", "confidence": 1.0}],

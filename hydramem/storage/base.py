@@ -4,6 +4,7 @@ Callers depend on these protocols, not on concrete backends (DIP).
 New backends can be added without modifying callers (OCP).
 Each protocol is minimal — clients depend only on what they use (ISP).
 """
+
 from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
@@ -19,9 +20,7 @@ class GraphRepository(Protocol):
 
     def add_relation(self, relation: Relation) -> None: ...
 
-    def delete_relation(
-        self, from_entity: str, to_entity: str, relation_type: str
-    ) -> bool: ...
+    def delete_relation(self, from_entity: str, to_entity: str, relation_type: str) -> bool: ...
 
     def delete_entity(self, entity_id: str) -> bool: ...
 
@@ -36,6 +35,7 @@ class GraphRepository(Protocol):
     def get_all_chunks(self) -> list[Chunk]: ...
 
     def list_relations(self, project: str = "default") -> list[dict]: ...
+
 
 @runtime_checkable
 class VectorRepository(Protocol):

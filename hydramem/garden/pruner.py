@@ -3,6 +3,7 @@
 Single responsibility: remove isolated or spurious graph elements.
 Does not infer or verify — only prunes.
 """
+
 from __future__ import annotations
 
 from hydramem.core.logging import get_logger
@@ -23,9 +24,7 @@ class KnowledgePruner:
     def __init__(self, store: KnowledgeStore) -> None:
         self._store = store
 
-    def prune(
-        self, project: str = "default", protected_ids: set[str] | None = None
-    ) -> dict:
+    def prune(self, project: str = "default", protected_ids: set[str] | None = None) -> dict:
         """Run rule-based pruning. Returns counts of *actually* removed items.
 
         Entities in *protected_ids* (reuse-protected by the consolidation

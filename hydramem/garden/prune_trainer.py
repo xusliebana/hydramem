@@ -10,6 +10,7 @@ picked up automatically by :class:`hydramem.gnn_prune.GNNPruner` (the
 Honest by construction: it refuses to fit with too few samples or a single
 class (returning a degenerate model would be dishonest, not helpful).
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -86,12 +87,8 @@ def train_pruner(
             f"'{project}', found {len(rows)}. Label more with `hydramem review`."
         )
 
-    x = np.asarray(
-        [edge_feature_vector(r.get("features") or {}) for r in rows], dtype=np.float64
-    )
-    y = np.asarray(
-        [1.0 if r.get("label") == "prune" else 0.0 for r in rows], dtype=np.float64
-    )
+    x = np.asarray([edge_feature_vector(r.get("features") or {}) for r in rows], dtype=np.float64)
+    y = np.asarray([1.0 if r.get("label") == "prune" else 0.0 for r in rows], dtype=np.float64)
     if len(set(y.tolist())) < 2:
         raise RuntimeError(
             f"train-pruner needs both 'prune' and 'keep' labels in project "
@@ -145,7 +142,10 @@ def train_pruner(
         saved_path = str(save_prune_weights(project, payload))
         logger.info(
             "Pruner trained for project=%s n_train=%d auc=%.3f → %s",
-            project, len(y_train), auc, saved_path,
+            project,
+            len(y_train),
+            auc,
+            saved_path,
         )
 
     return PruneTrainReport(

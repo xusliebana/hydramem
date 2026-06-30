@@ -13,6 +13,7 @@ normalisation** — no fuzzy / edit-distance matching — so it never silently
 fuses genuinely different entities (honesty contract). Disambiguation can be
 turned off entirely via ``ingest.entity_disambiguation: false``.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -107,9 +108,7 @@ class EntityRegistry:
         if type:
             bucket["types"].add(type)
 
-    def resolve(
-        self, name: str, type: str = "concept", project: str | None = None
-    ) -> Entity:
+    def resolve(self, name: str, type: str = "concept", project: str | None = None) -> Entity:
         """Return the canonical :class:`Entity` for *name*.
 
         When disabled, falls back to the legacy per-surface-form id so behaviour
@@ -119,14 +118,10 @@ class EntityRegistry:
         proj = project or self._project
         name = (name or "").strip()
         if not self._enabled:
-            return Entity(
-                id=raw_entity_id(proj, name), name=name, type=type, project=proj
-            )
+            return Entity(id=raw_entity_id(proj, name), name=name, type=type, project=proj)
         bucket = self._buckets.get(canonical_key(name))
         if bucket is None:
-            return Entity(
-                id=entity_id(proj, name), name=name, type=type, project=proj
-            )
+            return Entity(id=entity_id(proj, name), name=name, type=type, project=proj)
         return Entity(
             id=bucket["id"],
             name=best_display(bucket["aliases"]),

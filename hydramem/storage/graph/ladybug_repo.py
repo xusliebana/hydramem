@@ -4,6 +4,7 @@ DEPRECATED: upstream Kuzu is unmaintained (Graphiti dropped it in 2026 for the
 same reason). This backend still works but will be removed in a future release.
 Use the default Grafeo (Python 3.12+) or NetworkX backend instead.
 """
+
 from __future__ import annotations
 
 import json
@@ -78,8 +79,12 @@ class LadybugGraphRepository:
             self._q(
                 "MERGE (e:Entity {id: $id}) SET e.name = $name, e.type = $type,"
                 " e.project = $project",
-                {"id": entity.id, "name": entity.name, "type": entity.type,
-                 "project": entity.project},
+                {
+                    "id": entity.id,
+                    "name": entity.name,
+                    "type": entity.type,
+                    "project": entity.project,
+                },
             )
         except Exception as exc:
             logger.debug("add_entity: %s", exc)
@@ -124,9 +129,7 @@ class LadybugGraphRepository:
         except Exception as exc:
             logger.debug("add_relation: %s", exc)
 
-    def delete_relation(
-        self, from_entity: str, to_entity: str, relation_type: str
-    ) -> bool:
+    def delete_relation(self, from_entity: str, to_entity: str, relation_type: str) -> bool:
         try:
             self._q(
                 "MATCH (a:Entity {id: $f})-[r:RELATES_TO {relation_type: $t}]->(b:Entity {id: $to})"
@@ -166,11 +169,16 @@ class LadybugGraphRepository:
                         raw_q = json.loads(raw_q)
                     except (ValueError, TypeError):
                         raw_q = {}
-                rows.append({
-                    "from": r[0], "to": r[1],
-                    "relation_type": r[2], "confidence": r[3], "verified": r[4],
-                    "qualifiers": raw_q if isinstance(raw_q, dict) else {},
-                })
+                rows.append(
+                    {
+                        "from": r[0],
+                        "to": r[1],
+                        "relation_type": r[2],
+                        "confidence": r[3],
+                        "verified": r[4],
+                        "qualifiers": raw_q if isinstance(raw_q, dict) else {},
+                    }
+                )
             return rows
         except Exception as exc:
             logger.debug("list_relations: %s", exc)
@@ -202,8 +210,11 @@ class LadybugGraphRepository:
                 "MERGE (c:Chunk {id: $id}) SET c.text = $text, c.source = $source,"
                 " c.chunk_idx = $idx, c.doc_id = $doc_id, c.project = $project",
                 {
-                    "id": chunk.id, "text": chunk.text, "source": chunk.source,
-                    "idx": chunk.chunk_idx, "doc_id": chunk.doc_id,
+                    "id": chunk.id,
+                    "text": chunk.text,
+                    "source": chunk.source,
+                    "idx": chunk.chunk_idx,
+                    "doc_id": chunk.doc_id,
                     "project": chunk.project,
                 },
             )
@@ -214,8 +225,7 @@ class LadybugGraphRepository:
         """Persist a MENTIONS edge from a chunk to an entity."""
         try:
             self._q(
-                "MATCH (c:Chunk {id: $cid}), (e:Entity {id: $eid})"
-                " MERGE (c)-[:MENTIONS]->(e)",
+                "MATCH (c:Chunk {id: $cid}), (e:Entity {id: $eid}) MERGE (c)-[:MENTIONS]->(e)",
                 {"cid": chunk_id, "eid": entity_id},
             )
         except Exception as exc:
@@ -232,8 +242,9 @@ class LadybugGraphRepository:
             while res.has_next():
                 r = res.get_next()
                 chunks.append(
-                    Chunk(id=r[0], text=r[1], source=r[2],
-                          chunk_idx=r[3], doc_id=r[4], project=r[5])
+                    Chunk(
+                        id=r[0], text=r[1], source=r[2], chunk_idx=r[3], doc_id=r[4], project=r[5]
+                    )
                 )
             return chunks
         except Exception as exc:
@@ -249,8 +260,9 @@ class LadybugGraphRepository:
             while res.has_next():
                 r = res.get_next()
                 chunks.append(
-                    Chunk(id=r[0], text=r[1], source=r[2],
-                          chunk_idx=r[3], doc_id=r[4], project=r[5])
+                    Chunk(
+                        id=r[0], text=r[1], source=r[2], chunk_idx=r[3], doc_id=r[4], project=r[5]
+                    )
                 )
             return chunks
         except Exception as exc:

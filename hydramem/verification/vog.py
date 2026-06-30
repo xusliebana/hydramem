@@ -1,4 +1,5 @@
 """VoG (Verification of Groundedness) — LLM step-by-step relation checker."""
+
 from __future__ import annotations
 
 import re
@@ -78,7 +79,9 @@ class VoGVerifier:
             # operators can detect provider outages from the metrics.
             logger.warning("VoGVerifier: LLM returned empty — rejecting candidate")
             return VerificationResult(
-                accepted=False, score=0.0, level="vog_unavailable",
+                accepted=False,
+                score=0.0,
+                level="vog_unavailable",
                 vog_verdict="REJECTED",
             )
 

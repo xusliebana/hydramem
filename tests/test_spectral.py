@@ -1,4 +1,5 @@
 """Tests for the Laplacian Positional Encodings helper."""
+
 from __future__ import annotations
 
 import networkx as nx

@@ -126,9 +126,7 @@ class Config:
         #   gliner    → zero-shot multilingual NER (needs the [gliner] extra;
         #               degrades to heuristic when the model is unavailable).
         self.extraction_backend: str = (
-            _y(cfg, "extraction.backend")
-            or os.getenv("HYDRAMEM_EXTRACTOR")
-            or "heuristic"
+            _y(cfg, "extraction.backend") or os.getenv("HYDRAMEM_EXTRACTOR") or "heuristic"
         ).lower()
         self.gliner_model: str = (
             _y(cfg, "extraction.gliner.model")
@@ -136,17 +134,21 @@ class Config:
             or "urchade/gliner_multi-v2.1"
         )
         self.gliner_threshold: float = float(
-            _y(cfg, "extraction.gliner.threshold")
-            or os.getenv("HYDRAMEM_GLINER_THRESHOLD")
-            or 0.5
+            _y(cfg, "extraction.gliner.threshold") or os.getenv("HYDRAMEM_GLINER_THRESHOLD") or 0.5
         )
         _gliner_labels = _y(cfg, "extraction.gliner.labels")
         self.gliner_labels: list[str] = (
             [str(x) for x in _gliner_labels]
             if isinstance(_gliner_labels, list) and _gliner_labels
             else [
-                "person", "organization", "location", "concept",
-                "product", "technology", "event", "date",
+                "person",
+                "organization",
+                "location",
+                "concept",
+                "product",
+                "technology",
+                "event",
+                "date",
             ]
         )
 
@@ -224,9 +226,7 @@ class Config:
 
         # Consolidation — re-weight memory by retrieval reuse (no LLM in path).
         _consol = _y(cfg, "night_gardener.consolidation.enabled")
-        self.consolidation_enabled: bool = (
-            bool(_consol) if _consol is not None else True
-        )
+        self.consolidation_enabled: bool = bool(_consol) if _consol is not None else True
         self.consolidation_window_days: int = int(
             _y(cfg, "night_gardener.consolidation.window_days") or 30
         )
@@ -261,24 +261,18 @@ class Config:
         self.prune_review_band: float = float(
             _y(cfg, "night_gardener.review.uncertainty_band") or 0.25
         )
-        self.prune_review_max_per_run: int = int(
-            _y(cfg, "night_gardener.review.max_per_run") or 50
-        )
+        self.prune_review_max_per_run: int = int(_y(cfg, "night_gardener.review.max_per_run") or 50)
         # Auto-training (step 2): retrain the learned pruner at the end of a
         # cycle once enough labels exist. Opt-in; off by default.
         _auto_train = _y(cfg, "night_gardener.review.auto_train")
-        self.prune_review_auto_train: bool = (
-            bool(_auto_train) if _auto_train is not None else False
-        )
+        self.prune_review_auto_train: bool = bool(_auto_train) if _auto_train is not None else False
 
         # Temporal invalidation (Zep/Graphiti-style fact supersession). When a
         # new *functional* relation arrives, older conflicting edges get their
         # validity window closed (valid_to) instead of lingering as stale
         # contradictions. Off by default; only acts on configured relation types.
         _ti = _y(cfg, "night_gardener.temporal_invalidation.enabled")
-        self.temporal_invalidation_enabled: bool = (
-            bool(_ti) if _ti is not None else False
-        )
+        self.temporal_invalidation_enabled: bool = bool(_ti) if _ti is not None else False
         _ft = _y(cfg, "night_gardener.temporal_invalidation.functional_types")
         self.functional_relation_types: list[str] = (
             [str(x).lower() for x in _ft] if isinstance(_ft, list) and _ft else []
@@ -309,9 +303,7 @@ class Config:
             if _planner_on is not None
             else os.getenv("HYDRAMEM_PLANNER", "0") not in ("0", "false", "False")
         )
-        self.planner_threshold: float = float(
-            _y(cfg, "search.planner.threshold") or 0.15
-        )
+        self.planner_threshold: float = float(_y(cfg, "search.planner.threshold") or 0.15)
 
         # ── GNN pruner ────────────────────────────────────────────────────────
         _gnn_lpe = _y(cfg, "gnn.use_laplacian_pe")
@@ -360,8 +352,7 @@ class Config:
         self.ingest_entity_disambiguation: bool = (
             bool(_entity_disambig)
             if _entity_disambig is not None
-            else os.getenv("HYDRAMEM_ENTITY_DISAMBIGUATION", "1")
-            not in ("0", "false", "False")
+            else os.getenv("HYDRAMEM_ENTITY_DISAMBIGUATION", "1") not in ("0", "false", "False")
         )
 
         # ── Derived ───────────────────────────────────────────────────────────

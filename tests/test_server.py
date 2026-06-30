@@ -1,4 +1,5 @@
 """Targeted tests for MCP server session persistence."""
+
 from __future__ import annotations
 
 import sys
@@ -134,8 +135,11 @@ def test_graph_only_search_tool(monkeypatch):
 
     fake_search = MagicMock()
     fake_search.graph_only_search.return_value = {
-        "method": "graph_only", "chunks": [{"id": "c1"}],
-        "context": "ctx", "entities": ["X"], "matched_entities": [{"id": "e1"}],
+        "method": "graph_only",
+        "chunks": [{"id": "c1"}],
+        "context": "ctx",
+        "entities": ["X"],
+        "matched_entities": [{"id": "e1"}],
     }
     monkeypatch.setattr(server, "_search", fake_search)
 

@@ -9,6 +9,7 @@ actually counts *vector-similarity* rejections (see
 ``hydramem/verification/pipeline.py::verify_chunks``). The CLI labels reflect
 the correct semantics.
 """
+
 from __future__ import annotations
 
 import json
@@ -102,10 +103,20 @@ def log_event(
                     metadata_json
                 ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (
-                    ts, project, tool_name, session_id, llm_preset,
-                    tokens_injected, tokens_baseline, vog_score,
-                    chunks_total, chunks_rejected_srmkg, chunks_rejected_vog,
-                    cross_project_hit, latency_ms, was_hallucination_blocked,
+                    ts,
+                    project,
+                    tool_name,
+                    session_id,
+                    llm_preset,
+                    tokens_injected,
+                    tokens_baseline,
+                    vog_score,
+                    chunks_total,
+                    chunks_rejected_srmkg,
+                    chunks_rejected_vog,
+                    cross_project_hit,
+                    latency_ms,
+                    was_hallucination_blocked,
                     meta_json,
                 ),
             )
@@ -146,6 +157,7 @@ def query_stats(days: int = 7) -> dict:
 # SR-MKG decision log (training set for learned weights)
 # ---------------------------------------------------------------------------
 
+
 def log_srmkg_decision(
     *,
     project: str = "default",
@@ -170,9 +182,16 @@ def log_srmkg_decision(
                     score, final_label, source
                 ) VALUES (?,?,?,?,?,?,?,?,?,?)""",
                 (
-                    ts, project, relation_type,
-                    float(base), float(jaccard), float(type_boost), float(isolated),
-                    float(score), int(final_label), source,
+                    ts,
+                    project,
+                    relation_type,
+                    float(base),
+                    float(jaccard),
+                    float(type_boost),
+                    float(isolated),
+                    float(score),
+                    int(final_label),
+                    source,
                 ),
             )
             conn.commit()
@@ -229,9 +248,7 @@ def entity_reuse(project: str = "default", window_days: int = 30) -> list[dict]:
             "WHERE project = ? AND ts >= datetime('now', ?)"
         )
         with sqlite3.connect(DB_PATH) as conn:
-            rows = conn.execute(
-                sql, (project, f"-{int(window_days)} days")
-            ).fetchall()
+            rows = conn.execute(sql, (project, f"-{int(window_days)} days")).fetchall()
     except Exception as exc:  # noqa: BLE001
         _log.debug("entity_reuse query failed: %s", exc)
         return []

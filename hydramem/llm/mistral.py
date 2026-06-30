@@ -9,6 +9,7 @@ Key advantages for HydraMem:
 - No training on API data — contractual
 - Open-weight models available for local fallback via Ollama
 """
+
 from __future__ import annotations
 
 import os
@@ -44,9 +45,7 @@ class MistralProvider:
             or os.getenv("MISTRAL_API_KEY", "")
         )
         if not key:
-            raise RuntimeError(
-                f"Mistral API key not found. Set the {self._api_key_env!r} env var."
-            )
+            raise RuntimeError(f"Mistral API key not found. Set the {self._api_key_env!r} env var.")
         return key
 
     def complete(self, prompt: str, model: str | None = None) -> str:

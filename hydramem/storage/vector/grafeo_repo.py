@@ -16,6 +16,7 @@ Design notes:
   * ``vector_search`` return shape is normalised defensively because
     Grafeo's row representation varies by version (dict-with-node vs tuple).
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -39,7 +40,9 @@ class GrafeoVectorRepository:
             self._db.create_vector_index(_L_CHUNK, _PROP_EMBEDDING, dimensions=dim)
             logger.info(
                 "GrafeoVectorRepository: HNSW index on (:%s {%s}) dim=%d",
-                _L_CHUNK, _PROP_EMBEDDING, dim,
+                _L_CHUNK,
+                _PROP_EMBEDDING,
+                dim,
             )
         except Exception as exc:  # noqa: BLE001 — already exists
             logger.debug("create_vector_index (already exists?): %s", exc)
@@ -154,10 +157,14 @@ class GrafeoVectorRepository:
                 if isinstance(row, dict):
                     out.append({k: row.get(k) for k in ("id", "text", "source", "project")})
                 else:
-                    out.append({
-                        "id": row[0], "text": row[1],
-                        "source": row[2], "project": row[3],
-                    })
+                    out.append(
+                        {
+                            "id": row[0],
+                            "text": row[1],
+                            "source": row[2],
+                            "project": row[3],
+                        }
+                    )
             return out
         except Exception as exc:  # noqa: BLE001
             logger.debug("GrafeoVectorRepository.get_all_raw: %s", exc)

@@ -21,12 +21,13 @@ The roadmap allows upgrading to asymmetric signatures later — the envelope
 carries an ``algo`` field so the verifier can reject anything it does not
 support.
 """
+
 from __future__ import annotations
 
 import hashlib
 import hmac
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +42,7 @@ _DEFAULT_ALGO = "hmac-sha256"
 # ---------------------------------------------------------------------------
 # Signing helpers
 # ---------------------------------------------------------------------------
+
 
 def _canonical(payload: dict[str, Any]) -> bytes:
     return json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str).encode()
@@ -60,6 +62,7 @@ def _verify(payload: dict[str, Any], signature: str, secret: bytes, algo: str) -
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def export_project(
     out_path: str | Path,
@@ -83,7 +86,7 @@ def export_project(
         "algo": _DEFAULT_ALGO,
         "project": project,
         "issuer": issuer,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "payload": payload,
     }
     secret_bytes = secret.encode() if isinstance(secret, str) else secret
@@ -139,11 +142,14 @@ def import_project(
     s = store or get_store()
     imported = {"entities": 0, "relations": 0, "chunks": 0}
     for raw in payload.get("entities", []):
-        s.add_entity(Entity(
-            id=raw["id"], name=raw.get("name", ""),
-            type=raw.get("type", "concept"),
-            project=target_project,
-        ))
+        s.add_entity(
+            Entity(
+                id=raw["id"],
+                name=raw.get("name", ""),
+                type=raw.get("type", "concept"),
+                project=target_project,
+            )
+        )
         imported["entities"] += 1
 
     for raw in payload.get("chunks", []):
@@ -165,18 +171,20 @@ def import_project(
             pass
 
     for raw in payload.get("relations", []):
-        s.add_relation(Relation(
-            from_entity=raw.get("from") or raw.get("from_entity", ""),
-            to_entity=raw.get("to") or raw.get("to_entity", ""),
-            relation_type=raw.get("relation_type", "related_to"),
-            confidence=float(raw.get("confidence", 0.0) or 0.0),
-            verified=bool(raw.get("verified", False)),
-            project=target_project,
-            session_id=raw.get("session_id", ""),
-            origin_tool=raw.get("origin_tool", "federation_import"),
-            created_at=raw.get("created_at", ""),
-            qualifiers=raw.get("qualifiers") or {},
-        ))
+        s.add_relation(
+            Relation(
+                from_entity=raw.get("from") or raw.get("from_entity", ""),
+                to_entity=raw.get("to") or raw.get("to_entity", ""),
+                relation_type=raw.get("relation_type", "related_to"),
+                confidence=float(raw.get("confidence", 0.0) or 0.0),
+                verified=bool(raw.get("verified", False)),
+                project=target_project,
+                session_id=raw.get("session_id", ""),
+                origin_tool=raw.get("origin_tool", "federation_import"),
+                created_at=raw.get("created_at", ""),
+                qualifiers=raw.get("qualifiers") or {},
+            )
+        )
         imported["relations"] += 1
 
     return {

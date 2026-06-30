@@ -1,4 +1,5 @@
 """Logging factory — single responsibility: provide a named logger."""
+
 from __future__ import annotations
 
 import logging

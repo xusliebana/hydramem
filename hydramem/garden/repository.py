@@ -1,4 +1,5 @@
 """Session and Status repositories — single responsibility: persistence."""
+
 from __future__ import annotations
 
 import hashlib
@@ -66,10 +67,9 @@ class SessionRepository:
         if normalized.get("session_id"):
             merged = False
             for index, existing in enumerate(sessions):
-                if (
-                    existing.get("session_id") == normalized.get("session_id")
-                    and existing.get("project") == normalized.get("project")
-                ):
+                if existing.get("session_id") == normalized.get("session_id") and existing.get(
+                    "project"
+                ) == normalized.get("project"):
                     sessions[index] = self._merge_sessions(existing, normalized)
                     merged = True
                     break
@@ -81,7 +81,7 @@ class SessionRepository:
         sessions = sorted(
             sessions,
             key=lambda item: item.get("updated_at") or item.get("created_at") or "",
-        )[-self._MAX_SESSIONS:]
+        )[-self._MAX_SESSIONS :]
         self._path.parent.mkdir(parents=True, exist_ok=True)
         self._path.write_text(json.dumps(sessions, indent=2, default=str))
 
@@ -104,7 +104,8 @@ class SessionRepository:
             "session_id": session.get("session_id"),
             "project": session.get("project", "default"),
             "created_at": created_at,
-            "updated_at": session.get("updated_at") or (entries[-1].get("ts") if entries else created_at),
+            "updated_at": session.get("updated_at")
+            or (entries[-1].get("ts") if entries else created_at),
             "tool_name": session.get("tool_name"),
             "query": session.get("query", ""),
             "entries": entries[-cls._MAX_ENTRIES_PER_SESSION :],
@@ -128,7 +129,9 @@ class SessionRepository:
             "id": existing.get("id") or incoming.get("id"),
             "created_at": existing.get("created_at") or incoming.get("created_at"),
             "updated_at": (
-                entries[-1].get("ts") if entries else incoming.get("updated_at") or existing.get("updated_at")
+                entries[-1].get("ts")
+                if entries
+                else incoming.get("updated_at") or existing.get("updated_at")
             ),
             "query": incoming.get("query") or existing.get("query", ""),
             "entries": entries,
@@ -153,7 +156,9 @@ class SessionRepository:
             if fingerprint in index_by_fingerprint:
                 existing = normalized_entries[index_by_fingerprint[fingerprint]]
                 existing["repeat_count"] = int(existing.get("repeat_count", 1) or 1) + repeat_count
-                existing["last_seen_at"] = ts or existing.get("last_seen_at") or existing.get("ts", "")
+                existing["last_seen_at"] = (
+                    ts or existing.get("last_seen_at") or existing.get("ts", "")
+                )
                 if ts and ts >= str(existing.get("ts", "")):
                     existing["ts"] = ts
                 continue

@@ -4,6 +4,7 @@ A new *functional* relation supersedes an older conflicting one by closing the
 old edge's validity window (`valid_to`) rather than deleting it, so history is
 preserved and `as_of` retrieval stays correct.
 """
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -16,17 +17,20 @@ def _store():
     from hydramem.storage.graph.networkx_repo import NetworkXGraphRepository
     from hydramem.storage.vector.memory_repo import InMemoryVectorRepository
 
-    return KnowledgeStore(
-        graph=NetworkXGraphRepository(), vector=InMemoryVectorRepository()
-    )
+    return KnowledgeStore(graph=NetworkXGraphRepository(), vector=InMemoryVectorRepository())
 
 
 def _add(store, frm, to, rtype="located_in", **quals):
     store.add_entity(Entity(id=frm, name=frm, project="p"))
     store.add_entity(Entity(id=to, name=to, project="p"))
     store.add_relation(
-        Relation(from_entity=frm, to_entity=to, relation_type=rtype,
-                 confidence=0.9, qualifiers=dict(quals))
+        Relation(
+            from_entity=frm,
+            to_entity=to,
+            relation_type=rtype,
+            confidence=0.9,
+            qualifiers=dict(quals),
+        )
     )
 
 
@@ -40,8 +44,8 @@ def _quals(store, frm, to):
 class TestSupersedeRelations:
     def test_invalidates_older_conflicting_edge(self):
         store = _store()
-        _add(store, "alice", "paris")    # alice located_in paris (old)
-        _add(store, "alice", "london")   # alice located_in london (new)
+        _add(store, "alice", "paris")  # alice located_in paris (old)
+        _add(store, "alice", "london")  # alice located_in london (new)
         n = store.supersede_relations(
             "alice", "located_in", keep_to="london", valid_to="2026-06-30T00:00:00Z"
         )
@@ -54,7 +58,7 @@ class TestSupersedeRelations:
         _add(store, "alice", "paris", rtype="located_in")
         _add(store, "alice", "acme", rtype="works_at")
         n = store.supersede_relations("alice", "located_in", keep_to="berlin", valid_to="T")
-        assert n == 1                                    # only paris (located_in)
+        assert n == 1  # only paris (located_in)
         assert (_quals(store, "alice", "acme") or {}).get("valid_to") in (None, "")
 
     def test_idempotent_and_unknown_entity(self):
@@ -71,8 +75,8 @@ class TestSupersedeRelations:
         _add(store, "alice", "paris", valid_from="2020-01-01")
         store.supersede_relations("alice", "located_in", keep_to="london", valid_to="2026-01-01")
         q = _quals(store, "alice", "paris")
-        assert relation_valid_at(q, "2021-06-01") is True    # before the change
-        assert relation_valid_at(q, "2026-06-01") is False   # after the change
+        assert relation_valid_at(q, "2021-06-01") is True  # before the change
+        assert relation_valid_at(q, "2026-06-01") is False  # after the change
 
 
 class TestGardenerTemporalInvalidation:
@@ -80,8 +84,11 @@ class TestGardenerTemporalInvalidation:
         from hydramem.garden.gardener import NightGardener
 
         return NightGardener(
-            store=store, inferrer=MagicMock(), pipeline=MagicMock(),
-            pruner=MagicMock(), config=cfg,
+            store=store,
+            inferrer=MagicMock(),
+            pipeline=MagicMock(),
+            pruner=MagicMock(),
+            config=cfg,
         )
 
     def test_disabled_by_default(self):
@@ -97,11 +104,20 @@ class TestGardenerTemporalInvalidation:
 
         store = _store()
         _add(store, "alice", "paris")
-        cfg = load_config({"night_gardener": {"temporal_invalidation": {
-            "enabled": True, "functional_types": ["located_in"]}}})
+        cfg = load_config(
+            {
+                "night_gardener": {
+                    "temporal_invalidation": {"enabled": True, "functional_types": ["located_in"]}
+                }
+            }
+        )
         g = self._gardener(store, cfg)
-        rel = Relation(from_entity="alice", to_entity="london", relation_type="located_in",
-                       qualifiers={"valid_from": "2026-06-30"})
+        rel = Relation(
+            from_entity="alice",
+            to_entity="london",
+            relation_type="located_in",
+            qualifiers={"valid_from": "2026-06-30"},
+        )
         assert g._invalidate_superseded([rel]) == 1
         assert _quals(store, "alice", "paris").get("valid_to") == "2026-06-30"
 
@@ -110,8 +126,13 @@ class TestGardenerTemporalInvalidation:
 
         store = _store()
         _add(store, "alice", "bob", rtype="knows")
-        cfg = load_config({"night_gardener": {"temporal_invalidation": {
-            "enabled": True, "functional_types": ["located_in"]}}})
+        cfg = load_config(
+            {
+                "night_gardener": {
+                    "temporal_invalidation": {"enabled": True, "functional_types": ["located_in"]}
+                }
+            }
+        )
         g = self._gardener(store, cfg)
         rel = Relation(from_entity="alice", to_entity="carol", relation_type="knows")
         assert g._invalidate_superseded([rel]) == 0

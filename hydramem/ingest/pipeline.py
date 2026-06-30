@@ -3,10 +3,11 @@
 Single responsibility: coordinate the other services.  Does not implement
 any of their logic itself (SRP + DIP — depends on abstractions injected via __init__).
 """
+
 from __future__ import annotations
 
 import hashlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -60,21 +61,11 @@ class IngestionPipeline:
         self._embedding_dim = cfg.embedding_dim
         # Lazy verifier (only built when prechunked ingestion is invoked).
         self._verifier = verifier
-        self._max_chunks = int(
-            getattr(cfg, "ingest_max_chunks", _DEFAULT_MAX_CHUNKS)
-        )
-        self._max_entities = int(
-            getattr(cfg, "ingest_max_entities", _DEFAULT_MAX_ENTITIES)
-        )
-        self._max_relations = int(
-            getattr(cfg, "ingest_max_relations", _DEFAULT_MAX_RELATIONS)
-        )
-        self._verify_agent_relations = bool(
-            getattr(cfg, "ingest_verify_agent_relations", True)
-        )
-        self._entity_disambiguation = bool(
-            getattr(cfg, "ingest_entity_disambiguation", True)
-        )
+        self._max_chunks = int(getattr(cfg, "ingest_max_chunks", _DEFAULT_MAX_CHUNKS))
+        self._max_entities = int(getattr(cfg, "ingest_max_entities", _DEFAULT_MAX_ENTITIES))
+        self._max_relations = int(getattr(cfg, "ingest_max_relations", _DEFAULT_MAX_RELATIONS))
+        self._verify_agent_relations = bool(getattr(cfg, "ingest_verify_agent_relations", True))
+        self._entity_disambiguation = bool(getattr(cfg, "ingest_entity_disambiguation", True))
 
     def ingest_file(self, file_path: str, project: str = "default") -> dict:
         """Ingest a single Markdown file.  Returns a summary dict."""
@@ -83,9 +74,7 @@ class IngestionPipeline:
             raise FileNotFoundError(f"Not found: {file_path}")
         text = path.read_text(encoding="utf-8")
         doc_id = hashlib.sha256(str(path.resolve()).encode()).hexdigest()[:16]
-        result = self.ingest_text(
-            text, source=str(path), project=project, doc_id=doc_id
-        )
+        result = self.ingest_text(text, source=str(path), project=project, doc_id=doc_id)
         result["file"] = str(path)
         return result
 
@@ -109,9 +98,12 @@ class IngestionPipeline:
         raw_chunks = self._chunker.chunk(text)
         if not raw_chunks:
             return {
-                "source": source, "doc_id": doc_id,
-                "chunks_added": 0, "entities_added": 0,
-                "entities_merged": 0, "project": project,
+                "source": source,
+                "doc_id": doc_id,
+                "chunks_added": 0,
+                "entities_added": 0,
+                "entities_merged": 0,
+                "project": project,
             }
 
         # Build chunk metadata up front so we can do a single batched embed call.
@@ -120,8 +112,12 @@ class IngestionPipeline:
             chunk_id = hashlib.md5(f"{doc_id}:{idx}".encode()).hexdigest()
             chunk_objs.append(
                 Chunk(
-                    id=chunk_id, text=chunk_text, source=source,
-                    chunk_idx=idx, doc_id=doc_id, project=project,
+                    id=chunk_id,
+                    text=chunk_text,
+                    source=source,
+                    chunk_idx=idx,
+                    doc_id=doc_id,
+                    project=project,
                 )
             )
 
@@ -131,15 +127,12 @@ class IngestionPipeline:
         except Exception as exc:
             logger.warning(
                 "Batch embedding failed for %s (%s); falling back to zeros",
-                source, exc,
+                source,
+                exc,
             )
             embeddings = [[0.0] * self._embedding_dim for _ in chunk_objs]
 
-        registry = (
-            EntityRegistry(project, enabled=True)
-            if self._entity_disambiguation
-            else None
-        )
+        registry = EntityRegistry(project, enabled=True) if self._entity_disambiguation else None
         stored_chunks = 0
         # Pass A — persist chunks and extract entities, registering every
         # surface form so the registry can pick one best display per entity.
@@ -159,11 +152,7 @@ class IngestionPipeline:
         unique_entities: set[str] = set()
         for chunk_id, extracted in per_chunk:
             for ent in extracted:
-                entity = (
-                    registry.resolve(ent.name, ent.type, project)
-                    if registry
-                    else ent
-                )
+                entity = registry.resolve(ent.name, ent.type, project) if registry else ent
                 self._store.add_entity(entity)
                 self._store.add_mention(chunk_id, entity.id)
                 unique_entities.add(entity.id)
@@ -173,7 +162,11 @@ class IngestionPipeline:
 
         logger.info(
             "Ingested %s: %d chunks, %d entities (%d aliases merged, project=%s)",
-            source, stored_chunks, stored_entities, merged, project,
+            source,
+            stored_chunks,
+            stored_entities,
+            merged,
+            project,
         )
         return {
             "source": source,
@@ -262,7 +255,7 @@ class IngestionPipeline:
         # Stable doc_id if caller didn't pass one.
         if not doc_id:
             doc_id = hashlib.sha256(source.encode()).hexdigest()[:16]
-        created_at = datetime.now(timezone.utc).isoformat()
+        created_at = datetime.now(UTC).isoformat()
 
         # ── 1) Build Chunk objects + batch embed ──────────────────────────
         chunk_objs: list[Chunk] = []
@@ -274,8 +267,12 @@ class IngestionPipeline:
             cid = hashlib.md5(f"{doc_id}:{chunk_idx}".encode()).hexdigest()
             chunk_objs.append(
                 Chunk(
-                    id=cid, text=text, source=source,
-                    chunk_idx=chunk_idx, doc_id=doc_id, project=project,
+                    id=cid,
+                    text=text,
+                    source=source,
+                    chunk_idx=chunk_idx,
+                    doc_id=doc_id,
+                    project=project,
                 )
             )
 
@@ -314,10 +311,9 @@ class IngestionPipeline:
                 entities_added += 1
                 entity_count += 1
 
-        truncated_entities = sum(
-            max(0, len((c or {}).get("entities") or []))
-            for c in chunks
-        ) - entities_added
+        truncated_entities = (
+            sum(max(0, len((c or {}).get("entities") or [])) for c in chunks) - entities_added
+        )
         truncated_entities = max(0, truncated_entities)
 
         # ── 3) Process agent-supplied relations through verifier ──────────
@@ -354,12 +350,16 @@ class IngestionPipeline:
             except (TypeError, ValueError):
                 confidence = 0.5
             relation = Relation(
-                from_entity=from_id, to_entity=to_id,
-                relation_type=rtype, confidence=confidence,
+                from_entity=from_id,
+                to_entity=to_id,
+                relation_type=rtype,
+                confidence=confidence,
                 source_text=rel_dict.get("source_text", ""),
                 target_text=rel_dict.get("target_text", ""),
-                project=project, session_id=session_id,
-                origin_tool=origin_tool, created_at=created_at,
+                project=project,
+                session_id=session_id,
+                origin_tool=origin_tool,
+                created_at=created_at,
             )
             if verifier is None:
                 # Verification disabled: trust the agent.
@@ -384,8 +384,12 @@ class IngestionPipeline:
         logger.info(
             "ingest_prechunked(%s): chunks=%d entities=%d "
             "relations proposed/accepted/rejected = %d/%d/%d",
-            source, chunks_added, entities_added,
-            relations_proposed, relations_accepted, relations_rejected,
+            source,
+            chunks_added,
+            entities_added,
+            relations_proposed,
+            relations_accepted,
+            relations_rejected,
         )
         return {
             "source": source,
@@ -423,7 +427,7 @@ class IngestionPipeline:
         truncated_relations = max(0, len(relations) - self._max_relations)
         relations = relations[: self._max_relations]
 
-        created_at = datetime.now(timezone.utc).isoformat()
+        created_at = datetime.now(UTC).isoformat()
         name_to_id: dict[str, str] = {}
         entities_added = 0
         for ent_dict in entities:
@@ -433,9 +437,7 @@ class IngestionPipeline:
             etype = (ent_dict.get("type") or "concept").strip() or "concept"
             eid = hashlib.md5(f"{project}:{name}".encode()).hexdigest()[:12]
             name_to_id[name] = eid
-            self._store.add_entity(
-                Entity(id=eid, name=name, type=etype, project=project)
-            )
+            self._store.add_entity(Entity(id=eid, name=name, type=etype, project=project))
             entities_added += 1
 
         verifier = self._get_verifier() if self._verify_agent_relations else None
@@ -458,9 +460,12 @@ class IngestionPipeline:
             except (TypeError, ValueError):
                 confidence = 0.5
             relation = Relation(
-                from_entity=from_id, to_entity=to_id,
-                relation_type=rtype, confidence=confidence,
-                project=project, session_id=session_id,
+                from_entity=from_id,
+                to_entity=to_id,
+                relation_type=rtype,
+                confidence=confidence,
+                project=project,
+                session_id=session_id,
                 origin_tool="submit_session_extraction",
                 created_at=created_at,
             )
@@ -500,5 +505,6 @@ class IngestionPipeline:
         """Lazy build a ``VerificationPipeline`` (avoids LLM init at import)."""
         if self._verifier is None:
             from hydramem.verification.pipeline import VerificationPipeline
+
             self._verifier = VerificationPipeline(self._cfg)
         return self._verifier

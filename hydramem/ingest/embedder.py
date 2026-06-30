@@ -11,6 +11,7 @@ Backend selection (in order):
 The backend is detected lazily on the first ``embed*`` call so import-time
 cost stays minimal.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -91,9 +92,7 @@ class EmbeddingService:
                 # Modern embedders such as Nomic Embed ship custom modelling code
                 # and require trust_remote_code=True to load.
                 st_kwargs = (
-                    {"trust_remote_code": True}
-                    if "nomic" in self._model_name.lower()
-                    else {}
+                    {"trust_remote_code": True} if "nomic" in self._model_name.lower() else {}
                 )
                 self._model = SentenceTransformer(self._model_name, **st_kwargs)
                 self._backend = "sentence-transformers"

@@ -3,6 +3,7 @@
 New verification steps (e.g. a neural step) can be added by implementing
 VerificationStep without changing any caller (OCP).
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -17,8 +18,8 @@ class VerificationResult:
 
     accepted: bool
     score: float
-    level: str          # e.g. "srmkg_high", "srmkg_low", "vog"
-    vog_verdict: str | None = None   # "GROUNDED" / "PARTIAL" / "REJECTED"
+    level: str  # e.g. "srmkg_high", "srmkg_low", "vog"
+    vog_verdict: str | None = None  # "GROUNDED" / "PARTIAL" / "REJECTED"
 
 
 @runtime_checkable

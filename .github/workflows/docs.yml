@@ -27,13 +27,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v3
         with:
+          enable-cache: true
           python-version: "3.12"
       - name: Install docs dependencies
-        run: pip install "mkdocs-material>=9.5,<10"
+        run: uv sync --extra docs
       - name: Build site
-        run: mkdocs build --site-dir site
+        run: uv run mkdocs build --site-dir site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

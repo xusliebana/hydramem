@@ -14,6 +14,7 @@ Performance notes
 * ``trace_path`` builds the NetworkX projection on demand and caches it for
   the same TTL window so repeated path queries do not pay the rebuild cost.
 """
+
 from __future__ import annotations
 
 import math
@@ -45,9 +46,7 @@ class _BM25Index:
 
     _TOKEN = re.compile(r"[a-z0-9]+")
 
-    def __init__(
-        self, chunks: list[Chunk], *, k1: float = 1.5, b: float = 0.75
-    ) -> None:
+    def __init__(self, chunks: list[Chunk], *, k1: float = 1.5, b: float = 0.75) -> None:
         self._chunks = chunks
         self._k1 = k1
         self._b = b
@@ -64,10 +63,7 @@ class _BM25Index:
                 df[tok] = df.get(tok, 0) + 1
         n_docs = len(chunks)
         self._avgdl = (sum(self._len) / n_docs) if n_docs else 0.0
-        self._idf = {
-            tok: math.log(1.0 + (n_docs - n + 0.5) / (n + 0.5))
-            for tok, n in df.items()
-        }
+        self._idf = {tok: math.log(1.0 + (n_docs - n + 0.5) / (n + 0.5)) for tok, n in df.items()}
 
     @classmethod
     def _tokenize(cls, text: str) -> list[str]:
@@ -166,9 +162,7 @@ class SearchService:
             if self._ppr is not None:
                 self._ppr.invalidate(project)
 
-    def _entities_with_index(
-        self, project: str
-    ) -> tuple[list[dict], dict[str, list[dict]]]:
+    def _entities_with_index(self, project: str) -> tuple[list[dict], dict[str, list[dict]]]:
         """Return (entities, lowercase-token → entities) for *project*.
 
         The token index lets us resolve query terms in O(terms) instead of
@@ -216,9 +210,7 @@ class SearchService:
 
     # ── Public API ────────────────────────────────────────────────────────────
 
-    def priming_context(
-        self, query: str, project: str = "default", k: int = 3
-    ) -> dict:
+    def priming_context(self, query: str, project: str = "default", k: int = 3) -> dict:
         """Fast top-k retrieval + immediate graph neighbours. No LLM call."""
         try:
             embedding = self._embedder.embed(query, is_query=True)
@@ -258,12 +250,11 @@ class SearchService:
             "context": self._build_context(all_chunks),
         }
 
-    def trace_path(
-        self, from_entity: str, to_entity: str, project: str = "default"
-    ) -> dict:
+    def trace_path(self, from_entity: str, to_entity: str, project: str = "default") -> dict:
         """Return the shortest graph path between two entities."""
         try:
             import networkx as nx
+
             graph = self._cached_graph(project, nx)
             if from_entity in graph and to_entity in graph:
                 try:
@@ -369,16 +360,18 @@ class SearchService:
             quals = rel.get("qualifiers") or {}
             if as_of and not relation_valid_at(quals, as_of):
                 continue
-            facts.append({
-                "from": src,
-                "to": dst,
-                "relation_type": rel.get("relation_type"),
-                "confidence": rel.get("confidence"),
-                "valid_from": quals.get("valid_from", ""),
-                "valid_to": quals.get("valid_to", ""),
-                "verifier": quals.get("verifier", ""),
-                "current": not quals.get("valid_to"),
-            })
+            facts.append(
+                {
+                    "from": src,
+                    "to": dst,
+                    "relation_type": rel.get("relation_type"),
+                    "confidence": rel.get("confidence"),
+                    "valid_from": quals.get("valid_from", ""),
+                    "valid_to": quals.get("valid_to", ""),
+                    "verifier": quals.get("verifier", ""),
+                    "current": not quals.get("valid_to"),
+                }
+            )
         return facts
 
     def temporal_neighbors(
@@ -411,9 +404,7 @@ class SearchService:
         by_id = {e["id"]: e for e in self._store.list_entities(project=project)}
         return [by_id[i] for i in seen if i in by_id]
 
-    def _temporal_adjacency(
-        self, project: str, as_of: str, direction: str
-    ) -> dict[str, set[str]]:
+    def _temporal_adjacency(self, project: str, as_of: str, direction: str) -> dict[str, set[str]]:
         adjacency: dict[str, set[str]] = defaultdict(set)
         for rel in self._store.list_relations(project=project):
             quals = rel.get("qualifiers") or {}
@@ -496,17 +487,11 @@ class SearchService:
                     if traversal in ("bfs", "hybrid"):
                         graph_chunks.extend(self._store.get_chunks_near_entity(eid))
                         if max_hops > 1:
-                            for nb in self._store.get_entity_neighbors(
-                                eid, hops=max_hops - 1
-                            ):
-                                graph_chunks.extend(
-                                    self._store.get_chunks_near_entity(nb["id"])
-                                )
+                            for nb in self._store.get_entity_neighbors(eid, hops=max_hops - 1):
+                                graph_chunks.extend(self._store.get_chunks_near_entity(nb["id"]))
 
             if traversal in ("ppr", "hybrid") and seed_ids:
-                ppr_chunks, ppr_meta = self._ppr_chunks(
-                    seed_ids, project=project, top_k=top_k
-                )
+                ppr_chunks, ppr_meta = self._ppr_chunks(seed_ids, project=project, top_k=top_k)
 
         if traversal == "hybrid" and ppr_chunks:
             all_chunks = self._fuse_rrf(vector_chunks, graph_chunks, ppr_chunks)
@@ -560,9 +545,7 @@ class SearchService:
             "bm25": {"enabled": bm25_enabled, "candidates": len(bm25_chunks)},
             "entities": seed_ids,
             "planner": (
-                {"strategy": plan.name, "confidence": plan.confidence}
-                if plan is not None
-                else None
+                {"strategy": plan.name, "confidence": plan.confidence} if plan is not None else None
             ),
         }
 
@@ -659,9 +642,7 @@ class SearchService:
         if cached and (now - cached[1]) < _CACHE_TTL_SECONDS:
             return cached[0]
         corpus = [c for c in self._store.get_all_chunks() if c.project == project]
-        index = (
-            _BM25Index(corpus, k1=self._bm25_k1, b=self._bm25_b) if corpus else None
-        )
+        index = _BM25Index(corpus, k1=self._bm25_k1, b=self._bm25_b) if corpus else None
         self._bm25_cache[project] = (index, now)
         return index
 
@@ -679,9 +660,7 @@ class SearchService:
         for cl in chunk_lists:
             for c in cl:
                 all_by_id.setdefault(c.id, c)
-        return sorted(
-            all_by_id.values(), key=lambda c: order_idx.get(c.id, len(order_idx))
-        )
+        return sorted(all_by_id.values(), key=lambda c: order_idx.get(c.id, len(order_idx)))
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 

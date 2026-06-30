@@ -1,4 +1,5 @@
 """Tests for hydramem/telemetry/ (storage, shadow, stats query)."""
+
 from __future__ import annotations
 
 import sqlite3
@@ -13,10 +14,7 @@ class TestInitDb:
 
         with sqlite3.connect(tmp_metrics_db) as conn:
             tables = {
-                row[0]
-                for row in conn.execute(
-                    "SELECT name FROM sqlite_master WHERE type='table'"
-                )
+                row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
             }
         assert "events" in tables
 
@@ -106,8 +104,10 @@ class TestEstimateNaiveRagTokens:
                 self.text = text
                 self.similarity = sim
 
-        chunks = [FakeChunk(f"This is chunk number {i} with some text.", 1.0 - i * 0.05)
-                  for i in range(25)]
+        chunks = [
+            FakeChunk(f"This is chunk number {i} with some text.", 1.0 - i * 0.05)
+            for i in range(25)
+        ]
         result = estimate_naive_rag_tokens("What is HydraMem?", chunks, k=20)
         assert isinstance(result, int)
         assert result > 0
@@ -146,7 +146,7 @@ class TestEntityReuse:
         log_event(project="other", session_id="s3", metadata={"entities": ["e1"]})
 
         reuse = {r["entity_id"]: r for r in entity_reuse("p", window_days=30)}
-        assert set(reuse) == {"e1", "e2"}        # 'other' project excluded
+        assert set(reuse) == {"e1", "e2"}  # 'other' project excluded
         assert reuse["e1"]["sessions_touched"] == 2
         assert reuse["e1"]["total_touches"] == 2
         assert reuse["e2"]["sessions_touched"] == 1

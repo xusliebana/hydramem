@@ -7,6 +7,7 @@ mutation (atomic write via temp file + ``os.replace``).
 For a personal KMS (≲100k entities) this is fast enough and removes the
 need for a heavyweight embedded engine like Kuzu/LadybugDB.
 """
+
 from __future__ import annotations
 
 import atexit
@@ -140,9 +141,7 @@ class NetworkXGraphRepository:
 
     def add_relation(self, relation: Relation) -> None:
         with self._lock:
-            existing = self._graph.get_edge_data(
-                relation.from_entity, relation.to_entity
-            )
+            existing = self._graph.get_edge_data(relation.from_entity, relation.to_entity)
             qualifiers = dict(relation.qualifiers)
             confidence = relation.confidence
             verified = relation.verified
@@ -151,9 +150,7 @@ class NetworkXGraphRepository:
             # the same typed edge is re-observed (re-ingest, re-verify). Merge
             # qualifiers and keep the strongest confidence / verified verdict.
             if existing and existing.get("relation_type") == relation.relation_type:
-                qualifiers = merge_qualifiers(
-                    existing.get("qualifiers") or {}, qualifiers
-                )
+                qualifiers = merge_qualifiers(existing.get("qualifiers") or {}, qualifiers)
                 confidence = max(confidence, float(existing.get("confidence", 0.0)))
                 verified = verified or bool(existing.get("verified", False))
             self._graph.add_edge(
@@ -169,9 +166,7 @@ class NetworkXGraphRepository:
             )
             self._mark_dirty_and_flush()
 
-    def delete_relation(
-        self, from_entity: str, to_entity: str, relation_type: str
-    ) -> bool:
+    def delete_relation(self, from_entity: str, to_entity: str, relation_type: str) -> bool:
         with self._lock:
             if self._graph.has_edge(from_entity, to_entity):
                 self._graph.remove_edge(from_entity, to_entity)
@@ -244,21 +239,14 @@ class NetworkXGraphRepository:
             return invalidated
 
     def list_relations(self, project: str = "default") -> list[dict]:
-        return [
-            {"from": u, "to": v, **data}
-            for u, v, data in self._graph.edges(data=True)
-        ]
+        return [{"from": u, "to": v, **data} for u, v, data in self._graph.edges(data=True)]
 
     # ── Traversal ─────────────────────────────────────────────────────────────
 
     def get_entity_neighbors(self, entity_id: str, hops: int = 1) -> list[dict]:
         try:
             ego = nx.ego_graph(self._graph, entity_id, radius=hops)
-            return [
-                {"id": n, **self._graph.nodes[n]}
-                for n in ego.nodes
-                if n != entity_id
-            ]
+            return [{"id": n, **self._graph.nodes[n]} for n in ego.nodes if n != entity_id]
         except Exception as exc:  # noqa: BLE001
             logger.debug("NetworkXGraphRepository.get_entity_neighbors: %s", exc)
             return []

@@ -1,4 +1,5 @@
 """Tests for the ingestion pipeline (chunker, embedder, extractor, pipeline)."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -9,6 +10,7 @@ import pytest
 class TestMarkdownChunker:
     def test_basic_split(self):
         from hydramem.ingest.chunker import MarkdownChunker
+
         chunker = MarkdownChunker()
         md = """# Title
 
@@ -28,16 +30,19 @@ Content of section two.
 
     def test_empty_document(self):
         from hydramem.ingest.chunker import MarkdownChunker
+
         chunks = MarkdownChunker().chunk("")
         assert chunks == []
 
     def test_no_headers(self):
         from hydramem.ingest.chunker import MarkdownChunker
+
         chunks = MarkdownChunker().chunk("Just a single paragraph with no headers.")
         assert len(chunks) == 1
 
     def test_long_section_splits_by_paragraph(self):
         from hydramem.ingest.chunker import MarkdownChunker
+
         paragraphs = [f"Paragraph {i}: " + ("word " * 50) for i in range(20)]
         md = "## Big Section\n\n" + "\n\n".join(paragraphs)
         chunks = MarkdownChunker(max_tokens=200).chunk(md)
@@ -45,6 +50,7 @@ Content of section two.
 
     def test_no_chunk_exceeds_limit(self):
         from hydramem.ingest.chunker import MarkdownChunker
+
         chunker = MarkdownChunker(max_tokens=100)  # 400-char hard limit
         md = "## Big\n\n" + ("word " * 2000)  # ~10k chars, one giant paragraph
         chunks = chunker.chunk(md)
@@ -53,6 +59,7 @@ Content of section two.
 
     def test_consecutive_chunks_overlap(self):
         from hydramem.ingest.chunker import MarkdownChunker
+
         chunker = MarkdownChunker(max_tokens=100, overlap_tokens=20)
         body = " ".join(f"Sentence {i} about memory systems." for i in range(80))
         chunks = chunker.chunk("## S\n\n" + body)
@@ -64,6 +71,7 @@ Content of section two.
 class TestEntityExtractor:
     def test_finds_camel_case(self):
         from hydramem.ingest.extractor import EntityExtractor
+
         extractor = EntityExtractor()
         text = "HydraMem uses GraphRAG and LadybugDB for storage."
         entities = extractor.extract(text, "doc1", "test")
@@ -72,11 +80,13 @@ class TestEntityExtractor:
 
     def test_finds_backtick_code(self):
         from hydramem.ingest.extractor import EntityExtractor
+
         entities = EntityExtractor().extract("Use `hydra_search` to find documents.", "d", "t")
         assert any(e.name == "hydra_search" for e in entities)
 
     def test_deduplicates(self):
         from hydramem.ingest.extractor import EntityExtractor
+
         entities = EntityExtractor().extract(
             "HydraMem uses HydraMem extensively. HydraMem is great.", "d", "t"
         )
@@ -91,6 +101,7 @@ class TestIngestionPipeline:
         from hydramem.storage.factory import KnowledgeStore
         from hydramem.storage.graph.networkx_repo import NetworkXGraphRepository
         from hydramem.storage.vector.memory_repo import InMemoryVectorRepository
+
         store = KnowledgeStore(NetworkXGraphRepository(), InMemoryVectorRepository())
         embedder_mock = MagicMock()
         embedder_mock.embed.return_value = [0.1] * 384
@@ -118,34 +129,38 @@ class TestIngestionPipeline:
 
     def test_ingest_canonicalises_entity_variants(self, pipeline, tmp_path):
         from hydramem.ingest.registry import canonical_key
+
         md = tmp_path / "d.md"
         md.write_text("# Doc\n\nHydraMem is great here. Hydra Mem also works.")
         result = pipeline.ingest_file(str(md), project="t")
         ents = pipeline._store.list_entities(project="t")
         hydra = [e for e in ents if canonical_key(e["name"]) == "hydramem"]
-        assert len(hydra) == 1                     # surface-form variants collapsed
-        assert hydra[0]["name"] == "HydraMem"      # deterministic best display
+        assert len(hydra) == 1  # surface-form variants collapsed
+        assert hydra[0]["name"] == "HydraMem"  # deterministic best display
         assert result["entities_merged"] >= 1
 
     def test_ingest_text_remembers_a_note(self, pipeline):
         result = pipeline.ingest_text(
             "HydraMem verifies relations with SR-MKG and VoG.",
-            source="chat-note", project="t",
+            source="chat-note",
+            project="t",
         )
         assert result["chunks_added"] >= 1
         assert result["source"] == "chat-note"
-        assert pipeline._store.get_all_chunks()      # the note was persisted
+        assert pipeline._store.get_all_chunks()  # the note was persisted
 
 
 # Shim backward-compat
 class TestIngestShim:
     def test_chunk_markdown_via_shim(self):
         from hydramem.ingest.chunker import MarkdownChunker
+
         chunks = MarkdownChunker().chunk("# H\n\nPara.")
         assert len(chunks) >= 1
 
     def test_extract_entities_via_shim(self):
         from hydramem.ingest.extractor import EntityExtractor
+
         entities = EntityExtractor().extract("LanceDB stores vectors.", "d", "t")
         assert isinstance(entities, list)
 
@@ -153,6 +168,7 @@ class TestIngestShim:
 class TestGlinerExtractor:
     def test_factory_returns_gliner_backend(self):
         from hydramem.ingest.extractor import GlinerExtractor, create_extractor
+
         ext = create_extractor("gliner")
         assert isinstance(ext, GlinerExtractor)
 
@@ -160,6 +176,7 @@ class TestGlinerExtractor:
         # `gliner` is not installed in the test env, so extract() must degrade
         # to the heuristic backend rather than crash (local-first contract).
         from hydramem.ingest.extractor import EntityExtractor, GlinerExtractor
+
         ext = GlinerExtractor()
         text = "Call `hydra_search` then `KnowledgeStore`."
         ents = ext.extract(text, "d", "p")
@@ -201,7 +218,5 @@ class TestGlinerExtractor:
         from hydramem.ingest.pipeline import IngestionPipeline
 
         cfg = load_config({"extraction": {"backend": "gliner"}})
-        pipeline = IngestionPipeline(
-            store=MagicMock(), embedder=MagicMock(), config=cfg
-        )
+        pipeline = IngestionPipeline(store=MagicMock(), embedder=MagicMock(), config=cfg)
         assert isinstance(pipeline._extractor, GlinerExtractor)

@@ -3,6 +3,7 @@
 Runs entirely offline with the stub embedder, so it doubles as a regression
 guard that the benchmark harness keeps working.
 """
+
 from __future__ import annotations
 
 import importlib.util
@@ -60,8 +61,8 @@ def test_local_benchmark_llm_judge_with_mock(monkeypatch):
     report = bench.run_local(data_dir, k=5, judge_provider=_MockJudge())
     assert report["judge"]["enabled"] is True
     for cond in report["conditions"].values():
-        assert cond["judge_coverage"] == 1.0          # mock answers every query
-        assert cond["judge_answered"] == 1.0          # all judged ANSWERED
+        assert cond["judge_coverage"] == 1.0  # mock answers every query
+        assert cond["judge_answered"] == 1.0  # all judged ANSWERED
 
 
 def test_local_benchmark_judge_unavailable_is_honest(monkeypatch):
@@ -71,12 +72,12 @@ def test_local_benchmark_judge_unavailable_is_honest(monkeypatch):
 
     class _DeadJudge:
         def complete(self, prompt):
-            return ""   # LLM unavailable
+            return ""  # LLM unavailable
 
     report = bench.run_local(data_dir, k=5, judge_provider=_DeadJudge())
     for cond in report["conditions"].values():
         assert cond["judge_coverage"] == 0.0
-        assert cond["judge_answered"] is None         # honest: no fabricated score
+        assert cond["judge_answered"] is None  # honest: no fabricated score
 
 
 # ---------------------------------------------------------------------------
@@ -92,12 +93,24 @@ _SYNTHETIC_DATASET = {
         "distractor_ocean": "The Pacific Ocean is the largest ocean on Earth.",
     },
     "items": [
-        {"id": "q1", "question": "Which green apple cultivar is grown in orchards?",
-         "answer": "Granny Smith", "gold_doc_ids": ["doc_apple"]},
-        {"id": "q2", "question": "Which program landed astronauts on the Moon?",
-         "answer": "Apollo", "gold_doc_ids": ["doc_moon"]},
-        {"id": "q3", "question": "Who created the Python programming language?",
-         "answer": "Guido van Rossum", "gold_doc_ids": ["doc_python"]},
+        {
+            "id": "q1",
+            "question": "Which green apple cultivar is grown in orchards?",
+            "answer": "Granny Smith",
+            "gold_doc_ids": ["doc_apple"],
+        },
+        {
+            "id": "q2",
+            "question": "Which program landed astronauts on the Moon?",
+            "answer": "Apollo",
+            "gold_doc_ids": ["doc_moon"],
+        },
+        {
+            "id": "q3",
+            "question": "Who created the Python programming language?",
+            "answer": "Guido van Rossum",
+            "gold_doc_ids": ["doc_python"],
+        },
     ],
 }
 
@@ -138,11 +151,14 @@ def test_dataset_benchmark_judge_mock(monkeypatch, tmp_path):
             return "ANSWERED"
 
     report = bench.run_dataset(
-        _SYNTHETIC_DATASET, name="synthetic", k=5,
-        conditions=["naive_topk"], judge_provider=_MockJudge(),
+        _SYNTHETIC_DATASET,
+        name="synthetic",
+        k=5,
+        conditions=["naive_topk"],
+        judge_provider=_MockJudge(),
     )
     cond = report.conditions[0]
-    assert cond.factual_accuracy == 1.0          # mock answers everything
+    assert cond.factual_accuracy == 1.0  # mock answers everything
     assert cond.hallucination_rate == 0.0
 
 
@@ -152,19 +168,20 @@ def test_resolve_dataset_from_file(monkeypatch, tmp_path):
     bench = _load_benchmark()
     path = tmp_path / "norm.json"
     path.write_text(__import__("json").dumps(_SYNTHETIC_DATASET))
-    args = argparse.Namespace(
-        from_file=str(path), dataset="musique", limit=2, refresh=False
-    )
+    args = argparse.Namespace(from_file=str(path), dataset="musique", limit=2, refresh=False)
     data = bench._resolve_dataset(args)
-    assert len(data["items"]) == 2                # limited
-    assert len(data["corpus"]) == 5              # corpus kept whole (distractors)
+    assert len(data["items"]) == 2  # limited
+    assert len(data["corpus"]) == 5  # corpus kept whole (distractors)
 
 
 def test_render_markdown_and_narrative():
     bench = _load_benchmark()
     report = bench.BenchmarkReport(
-        dataset="synthetic", git_commit="abc123", llm_model="stub:x",
-        judge_model="none", timestamp="2026-06-30T00:00:00Z",
+        dataset="synthetic",
+        git_commit="abc123",
+        llm_model="stub:x",
+        judge_model="none",
+        timestamp="2026-06-30T00:00:00Z",
     )
     report.conditions = [
         bench.ConditionResult(name="naive_topk", questions=3, recall_at_5=0.3),
@@ -174,7 +191,7 @@ def test_render_markdown_and_narrative():
     md = bench._render_markdown(__import__("dataclasses").asdict(report))
     assert "# Benchmark report — synthetic" in md
     assert "naive_topk" in md
-    assert "Recall@5 by +0.300" in md            # hybrid vs naive narrative
+    assert "Recall@5 by +0.300" in md  # hybrid vs naive narrative
 
 
 def test_unavailable_dataset_loader_is_honest():
