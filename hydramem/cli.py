@@ -113,10 +113,10 @@ def _fmt_tokens(n: int) -> str:
     return str(n)
 
 
-def _compute_stats(days: int) -> dict:
+def _compute_stats(days: int, project: str | None = None) -> dict:
     from hydramem.telemetry.storage import query_stats
 
-    raw = query_stats(days=days)
+    raw = query_stats(days=days, project=project)
     if not raw:
         return {}
 
@@ -177,8 +177,9 @@ def cmd_stats(args: argparse.Namespace) -> None:
     _ensure_config()
 
     days = args.days if hasattr(args, "days") and args.days else 7
+    project = getattr(args, "project", None)
 
-    stats = _compute_stats(days)
+    stats = _compute_stats(days, project=project)
     if not stats:
         print(f"No telemetry data found for the last {days} days.")
         print("Run `hydramem-server` and make some queries to collect data.")
@@ -190,22 +191,27 @@ def cmd_stats(args: argparse.Namespace) -> None:
 
     if getattr(args, "raw", False):
         # Show the un-aggregated baseline so the savings % is auditable.
-        import sqlite3 as _sql
-
-        from hydramem.telemetry.storage import DB_PATH, init_db
+        from hydramem.telemetry.storage import _connect, init_db
 
         init_db()
-        with _sql.connect(DB_PATH) as conn:
+        sql = (
+            "SELECT ts, tool_name, tokens_baseline, tokens_injected,"
+            " chunks_total, chunks_rejected_srmkg AS rejected_vector_prefilter,"
+            " chunks_rejected_vog, vog_score, latency_ms"
+            " FROM events"
+            " WHERE ts >= datetime('now', :delta)"
+        )
+        params: dict[str, str] = {"delta": f"-{days} days"}
+        project = getattr(args, "project", None)
+        if project:
+            sql += " AND project = :project"
+            params["project"] = project
+        sql += " ORDER BY ts DESC LIMIT 500"
+        import sqlite3 as _sql
+
+        with _connect() as conn:
             conn.row_factory = _sql.Row
-            rows = conn.execute(
-                "SELECT ts, tool_name, tokens_baseline, tokens_injected,"
-                " chunks_total, chunks_rejected_srmkg AS rejected_vector_prefilter,"
-                " chunks_rejected_vog, vog_score, latency_ms"
-                " FROM events"
-                " WHERE ts >= datetime('now', :delta)"
-                " ORDER BY ts DESC LIMIT 500",
-                {"delta": f"-{days} days"},
-            ).fetchall()
+            rows = conn.execute(sql, params).fetchall()
         print(json.dumps([dict(r) for r in rows], indent=2, default=str))
         return
 
@@ -418,14 +424,66 @@ def _print_garden_status_plain(status: dict) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Projects command
+# ---------------------------------------------------------------------------
+
+
+def cmd_projects(args: argparse.Namespace) -> None:
+    """List all known projects from telemetry events and the knowledge store."""
+    from hydramem.telemetry.storage import list_projects
+
+    projects = set(list_projects())
+
+    # Also check the knowledge store for projects that have entities but no
+    # telemetry yet (e.g. freshly imported via federation).
+    try:
+        from hydramem.storage.factory import get_store
+
+        store = get_store()
+        if hasattr(store, "list_projects"):
+            projects.update(store.list_projects())
+    except Exception:  # noqa: BLE001
+        pass
+
+    sorted_projects = sorted(projects)
+
+    if getattr(args, "json", False):
+        print(json.dumps(sorted_projects, indent=2))
+        return
+
+    if not sorted_projects:
+        print("No projects found. Ingest some documents or start the MCP server.")
+        return
+
+    if _RICH:
+        console = Console()
+        t = Table(title="HydraMem Projects", box=box.ROUNDED, show_header=True)
+        t.add_column("#", style="dim", justify="right")
+        t.add_column("Project", style="bold cyan")
+        for i, p in enumerate(sorted_projects, 1):
+            t.add_row(str(i), p)
+        console.print()
+        console.print(t)
+        console.print()
+    else:
+        print("\nHydraMem Projects")
+        print("=" * 30)
+        for i, p in enumerate(sorted_projects, 1):
+            print(f"  {i}. {p}")
+        print()
+
+
+# ---------------------------------------------------------------------------
 # Telemetry command
 # ---------------------------------------------------------------------------
 
 
 def cmd_telemetry(args: argparse.Namespace) -> None:
+    project = getattr(args, "project", None)
+
     if getattr(args, "show", False):
         _ensure_config()
-        stats = _compute_stats(days=30)
+        stats = _compute_stats(days=30, project=project)
         print(json.dumps(stats, indent=2))
 
     elif getattr(args, "wipe", False):
@@ -446,7 +504,7 @@ def cmd_telemetry(args: argparse.Namespace) -> None:
     elif getattr(args, "send", False):
         from hydramem.telemetry.aggregate import send_aggregate_if_opted_in
 
-        stats = _compute_stats(days=30)
+        stats = _compute_stats(days=30, project=project)
         sent = send_aggregate_if_opted_in(stats)
         if sent:
             print("Aggregate metrics sent.")
@@ -840,6 +898,11 @@ def build_parser() -> argparse.ArgumentParser:
     # stats
     p_stats = sub.add_parser("stats", help="Show token-saving statistics")
     p_stats.add_argument(
+        "--project",
+        default=None,
+        help="Filter stats to a specific project (default: all projects)",
+    )
+    p_stats.add_argument(
         "--days",
         type=int,
         default=7,
@@ -866,6 +929,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     # telemetry
     p_tele = sub.add_parser("telemetry", help="Manage telemetry data")
+    p_tele.add_argument(
+        "--project",
+        default=None,
+        help="Filter telemetry to a specific project",
+    )
     excl = p_tele.add_mutually_exclusive_group()
     excl.add_argument("--show", action="store_true", help="Show aggregated JSON")
     excl.add_argument("--wipe", action="store_true", help="Delete metrics.db")
@@ -882,6 +950,17 @@ def build_parser() -> argparse.ArgumentParser:
         "--json",
         action="store_true",
         help="Print raw garden status as JSON",
+    )
+
+    # projects
+    p_projects = sub.add_parser(
+        "projects",
+        help="List all known projects (from telemetry and the knowledge store)",
+    )
+    p_projects.add_argument(
+        "--json",
+        action="store_true",
+        help="Print the project list as a JSON array",
     )
 
     # ingest-async
@@ -1021,6 +1100,8 @@ def main() -> None:
         cmd_stats(args)
     elif args.command == "garden-status":
         cmd_garden_status(args)
+    elif args.command == "projects":
+        cmd_projects(args)
     elif args.command == "telemetry":
         cmd_telemetry(args)
     elif args.command == "ingest-async":

@@ -63,12 +63,39 @@ CREATE INDEX IF NOT EXISTS idx_srmkg_project ON srmkg_decisions(project);
 """
 
 
+_DB_TIMEOUT = 30  # seconds to wait for the SQLite lock before raising
+
+
+def _connect(path: Path = DB_PATH) -> sqlite3.Connection:
+    """Open a connection with WAL journal mode and a generous busy timeout.
+
+    WAL (Write-Ahead Logging) allows concurrent readers and a single writer
+    without blocking — crucial when multiple ``hydramem`` processes share one
+    ``metrics.db``.
+    """
+    conn = sqlite3.connect(path, timeout=_DB_TIMEOUT)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=30000")  # 30 s retry at the SQLite level
+    return conn
+
+
+_init_done: bool = False
+
+
 def init_db() -> None:
-    """Create ~/.hydramem/metrics.db and the events table if needed."""
+    """Create ~/.hydramem/metrics.db and the events table if needed.
+
+    Uses an idempotent CREATE-IF-NOT-EXISTS pattern with WAL mode so concurrent
+    processes don't deadlock.
+    """
+    global _init_done  # noqa: PLW0603
+    if _init_done:
+        return
     DB_DIR.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(DB_PATH) as conn:
+    with _connect() as conn:
         conn.executescript(_SCHEMA)
         conn.commit()
+    _init_done = True
 
 
 def log_event(
@@ -93,7 +120,7 @@ def log_event(
         init_db()
         ts = datetime.now(UTC).isoformat()
         meta_json = json.dumps(metadata or {})
-        with sqlite3.connect(DB_PATH) as conn:
+        with _connect() as conn:
             conn.execute(
                 """INSERT INTO events (
                     ts, project, tool_name, session_id, llm_preset,
@@ -122,14 +149,17 @@ def log_event(
             )
             conn.commit()
     except Exception as exc:  # noqa: BLE001
-        # Telemetry must never crash the application, but silent failures hide
-        # real bugs. Log at debug level so operators can opt in via
-        # ``LOG_LEVEL=DEBUG`` without spamming normal output.
-        _log.debug("telemetry log_event failed: %s", exc)
+        # Telemetry must never crash the application. Log at WARNING so
+        # operators notice when events are being dropped (e.g. filesystem
+        # full, permissions error) without requiring DEBUG verbosity.
+        _log.warning("telemetry log_event failed: %s", exc)
 
 
-def query_stats(days: int = 7) -> dict:
-    """Return aggregated stats for the last *days* days."""
+def query_stats(days: int = 7, project: str | None = None) -> dict:
+    """Return aggregated stats for the last *days* days.
+
+    If *project* is given, only events for that project are included.
+    """
     init_db()
     sql = """
         SELECT
@@ -147,10 +177,24 @@ def query_stats(days: int = 7) -> dict:
         FROM events
         WHERE ts >= datetime('now', :delta)
     """
-    with sqlite3.connect(DB_PATH) as conn:
+    params: dict[str, str] = {"delta": f"-{days} days"}
+    if project:
+        sql += " AND project = :project"
+        params["project"] = project
+    with _connect() as conn:
         conn.row_factory = sqlite3.Row
-        row = conn.execute(sql, {"delta": f"-{days} days"}).fetchone()
+        row = conn.execute(sql, params).fetchone()
     return dict(row) if row else {}
+
+
+def list_projects() -> list[str]:
+    """Return a sorted list of distinct project names from the events table."""
+    init_db()
+    with _connect() as conn:
+        rows = conn.execute(
+            "SELECT DISTINCT project FROM events WHERE project IS NOT NULL ORDER BY project"
+        ).fetchall()
+    return [r[0] for r in rows]
 
 
 # ---------------------------------------------------------------------------
@@ -174,7 +218,7 @@ def log_srmkg_decision(
     try:
         init_db()
         ts = datetime.now(UTC).isoformat()
-        with sqlite3.connect(DB_PATH) as conn:
+        with _connect() as conn:
             conn.execute(
                 """INSERT INTO srmkg_decisions (
                     ts, project, relation_type,
@@ -207,7 +251,7 @@ def fetch_srmkg_decisions(project: str | None = None) -> list[dict]:
     if project:
         sql += " WHERE project = ?"
         params = (project,)
-    with sqlite3.connect(DB_PATH) as conn:
+    with _connect() as conn:
         conn.row_factory = sqlite3.Row
         return [dict(r) for r in conn.execute(sql, params).fetchall()]
 
@@ -247,7 +291,7 @@ def entity_reuse(project: str = "default", window_days: int = 30) -> list[dict]:
             "SELECT session_id, ts, metadata_json FROM events "
             "WHERE project = ? AND ts >= datetime('now', ?)"
         )
-        with sqlite3.connect(DB_PATH) as conn:
+        with _connect() as conn:
             rows = conn.execute(sql, (project, f"-{int(window_days)} days")).fetchall()
     except Exception as exc:  # noqa: BLE001
         _log.debug("entity_reuse query failed: %s", exc)
