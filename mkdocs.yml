@@ -95,7 +95,9 @@ nav:
       - Verification: verification.md
       - Night Gardener: night-gardener.md
       - Benchmarks: benchmarks.md
+  - Guía de uso (ES): guia-uso-completa.md
   - Reference:
+      - CLI Reference: cli-reference.md
       - MCP Tools: mcp-tools-reference.md
       - Configuration: configuration.md
       - Telemetry: telemetry.md

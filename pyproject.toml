@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hydramem"
-version = "0.2.0"
+version = "0.2.1"
 description = "100% local, privacy-first long-term memory for AI agents — hybrid graph + vector search, two-stage verification, and autonomous Night Gardener"
 readme = "README.md"
 requires-python = ">=3.11"
